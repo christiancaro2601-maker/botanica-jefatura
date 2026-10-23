@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Botánica Jefatura</title>
+<meta name="description" content="Apoyo gratuito para simplificar el trabajo de jefatura de curso." />
+<style>
+  :root{
+    --green:#3B6D11; --green-dark:#27500A; --green-tint:#EAF3DE;
+    --red:#CE1323; --red-dark:#7A0E16; --red-tint:#FBEAEA;
+    --amber-tint:#FBF3DC; --amber-dark:#6B4E00;
+    --ink:#222222; --muted:#5F6B55; --card:#F4F6F2; --line:#DFE4DA; --white:#FFFFFF;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--white); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; }
+  .page { max-width:1100px; margin:0 auto; padding:1.5rem 16px 2.5rem; }
+
+  .brand { display:flex; align-items:center; gap:10px; margin:0 0 0.3rem; }
+  .brand-mark { width:34px; height:34px; border-radius:50%; background:var(--green-tint); color:var(--green);
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .brand-word { font-size:26px; letter-spacing:-0.4px; }
+  .brand-word b { font-weight:600; color:var(--green); }
+  .brand-tag { font-size:13px; font-weight:600; color:var(--green-dark); background:var(--green-tint); border-radius:999px; padding:0.15rem 0.65rem; margin-left:4px; }
+  header .sub { font-size:13.5px; color:var(--muted); margin:0 0 1.1rem; }
+
+  .layout { display:flex; gap:1.2rem; align-items:flex-start; }
+  .main { flex:1 1 auto; min-width:0; }
+  .side { flex:0 0 300px; }
+  @media (max-width: 860px){ .layout { flex-direction:column; } .side { flex:1 1 auto; width:100%; } }
+
+  #chat { display:flex; flex-direction:column; gap:10px; min-height:360px; max-height:64vh;
+    overflow-y:auto; padding:0.2rem 0.2rem 0.2rem 0; margin-bottom:1rem; }
+  .b-bot { background:var(--card); border-radius:14px; border-bottom-left-radius:4px;
+    padding:0.7rem 0.95rem; max-width:88%; font-size:14.5px; line-height:1.55; white-space:pre-line; }
+  .b-user { background:var(--green); color:#fff; border-radius:14px; border-bottom-right-radius:4px;
+    padding:0.6rem 0.95rem; max-width:88%; align-self:flex-end; font-size:14.5px; line-height:1.5; }
+  .b-card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:0.85rem 1rem;
+    max-width:96%; font-size:13.8px; line-height:1.55; }
+  .b-card h3 { font-size:14.5px; margin:0 0 0.5rem; color:var(--green-dark); }
+  .b-card ol, .b-card ul { margin:0.2rem 0 0.3rem; padding-left:1.2rem; }
+  .b-card li { margin-bottom:0.3rem; }
+  .b-card pre { white-space:pre-wrap; font-family:inherit; margin:0.3rem 0 0.6rem; background:var(--card);
+    border-radius:8px; padding:0.7rem 0.8rem; font-size:13.5px; }
+  .b-card .src { font-size:11.5px; color:var(--muted); margin-top:0.5rem; }
+  .b-note { background:var(--amber-tint); color:var(--amber-dark); border-radius:10px; padding:0.65rem 0.9rem;
+    font-size:13.3px; line-height:1.5; max-width:96%; }
+  .b-alert { background:var(--red-tint); color:var(--red-dark); border-radius:10px; padding:0.75rem 0.95rem;
+    font-size:13.8px; line-height:1.55; max-width:96%; }
+  .tbl { width:100%; border-collapse:collapse; font-size:13.3px; }
+  .tbl td { padding:0.35rem 0.4rem; border-bottom:1px solid #E6EAE2; vertical-align:top; }
+  .tbl td:first-child { color:var(--muted); white-space:nowrap; width:1%; font-variant-numeric:tabular-nums; }
+
+  button { cursor:pointer; font-family:inherit; font-weight:600; border:none; border-radius:10px; }
+  .btn-ghost { background:var(--card); color:var(--ink); border:1px solid var(--line);
+    padding:0.5rem 0.9rem; font-size:13.5px; text-align:left; }
+  .btn-ghost:active { background:var(--green-tint); }
+  .btn-ghost[aria-pressed="true"] { background:var(--green-tint); border-color:var(--green); color:var(--green-dark); }
+  .btn-small { background:var(--green); color:#fff; padding:0.4rem 0.85rem; font-size:13px; }
+  .btn-small:disabled { opacity:0.5; cursor:default; }
+  .btn-home { background:none; color:var(--green-dark); text-decoration:underline; padding:0.5rem 0.2rem; font-size:13px; }
+  button:focus-visible { outline:2px solid var(--green-dark); outline-offset:2px; }
+  .opt-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:0.6rem; }
+
+  .panel { background:var(--card); border-radius:12px; padding:0.9rem 1rem; margin-bottom:0.8rem; }
+  .panel h2 { font-size:12.5px; color:var(--green-dark); margin:0 0 0.6rem; font-weight:700; }
+  .panel ul { margin:0; padding-left:1.1rem; font-size:12.8px; line-height:1.5; }
+  .panel li { margin-bottom:0.25rem; }
+  .empty { font-size:12.5px; color:var(--muted); line-height:1.5; margin:0; }
+  .kv { display:flex; justify-content:space-between; gap:0.6rem; font-size:12.5px; padding:0.25rem 0; }
+  .kv span:first-child { color:var(--muted); }
+  .kv span:last-child { font-weight:600; text-align:right; }
+  .sources { font-size:11.8px; color:var(--muted); line-height:1.5; }
+  .sources li { margin-bottom:0.3rem; }
+
+  footer { margin-top:1.4rem; font-size:11.5px; color:var(--muted); text-align:center; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="brand">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V11"/><path d="M12 14c0-3.3 2.7-6 6-6 0 3.3-2.7 6-6 6z"/><path d="M12 12C12 8.7 9.3 6 6 6c0 3.3 2.7 6 6 6z"/></svg></span>
+      <span class="brand-word"><b>bot</b>ánica</span><span class="brand-tag">Jefatura de curso</span>
+    </div>
+    <p class="sub">Menos tiempo en lo administrativo, más tiempo para tu curso. Calendario, reuniones de apoderados, consejo de curso, seguimiento y prioridades del mes.</p>
+  </header>
+
+  <div class="layout">
+    <div class="main">
+      <div id="chat" aria-live="polite"></div>
+      <div id="options" class="opt-row"></div>
+    </div>
+    <aside class="side">
+      <div class="panel">
+        <h2>Tu jefatura</h2>
+        <div id="profile-box"><p class="empty">Elige tu nivel para empezar.</p></div>
+      </div>
+      <div class="panel">
+        <h2 id="month-title">Este mes</h2>
+        <div id="month-box"><p class="empty">Aparece cuando elijas tu nivel.</p></div>
+      </div>
+      <div class="panel">
+        <h2>Mi foco del mes</h2>
+        <div id="focus-box"><p class="empty">Usa "Priorizar mis tareas" para definirlo.</p></div>
+      </div>
+      <div class="panel">
+        <h2>Fuentes</h2>
+        <ul class="sources">
+          <li>Mineduc (2018). Orientación. Rol de la jefatura de curso, 7º básico a 2º medio.</li>
+          <li>Mineduc (2021). El rol del profesor jefe en la promoción de la retención escolar.</li>
+          <li>Mineduc (2023). Orientaciones didácticas, Orientación.</li>
+          <li>Educarchile. Orientaciones para el desempeño del profesor jefe, 1° a 6° básico.</li>
+          <li>Decreto 67 de 2018, Ministerio de Educación, sobre evaluación, calificación y promoción.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    Botánica es un prototipo académico de un doctorado en educación. No pide ni guarda datos de estudiantes. Tus preferencias quedan solo en este dispositivo.<br>
+    Si eres tú quien lo está pasando mal, la Línea *4141 atiende gratis las 24 horas.
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var chatEl = document.getElementById('chat'), optionsEl = document.getElementById('options');
+var profileEl = document.getElementById('profile-box'), monthEl = document.getElementById('month-box');
+var monthTitle = document.getElementById('month-title'), focusEl = document.getElementById('focus-box');
+
+// ---------- estado (preferencias locales) ----------
+var KEY = 'botanica_jefatura_v1';
+var mem = null;
+function load(){ try { var r = localStorage.getItem(KEY); if (r) return JSON.parse(r); } catch(e){} return mem; }
+function save(){ mem = st; try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e){} }
+var st = load() || { nivel:'', curso:'', foco:null };
+
+var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+var mesIdx = new Date().getMonth();   // 0 a 11
+if (mesIdx < 2) mesIdx = 2;            // en enero y febrero se muestra marzo, inicio del año escolar
+
+// ---------- interfaz ----------
+function scrollDown(){ chatEl.scrollTop = chatEl.scrollHeight; }
+function bot(t, cls){ var d = document.createElement('div'); d.className = cls || 'b-bot'; d.textContent = t; chatEl.appendChild(d); scrollDown(); return d; }
+function node(n){ chatEl.appendChild(n); scrollDown(); return n; }
+function user(t){ var d = document.createElement('div'); d.className = 'b-user'; d.textContent = t; chatEl.appendChild(d); scrollDown(); }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function options(list, handler, withHome){
+  optionsEl.innerHTML = '';
+  list.forEach(function(label){
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'btn-ghost'; b.textContent = label;
+    b.addEventListener('click', function(){ optionsEl.innerHTML = ''; user(label); handler(label); });
+    optionsEl.appendChild(b);
+  });
+  if (withHome !== false && st.nivel) {
+    var h = document.createElement('button'); h.type = 'button'; h.className = 'btn-home'; h.textContent = 'Volver al menú';
+    h.addEventListener('click', function(){ optionsEl.innerHTML = ''; user('Volver al menú'); menu(); });
+    optionsEl.appendChild(h);
+  }
+}
+function card(title, html, src){
+  var c = document.createElement('div'); c.className = 'b-card';
+  c.innerHTML = (title ? '<h3>' + esc(title) + '</h3>' : '') + html + (src ? '<div class="src">Fuente. ' + esc(src) + '</div>' : '');
+  return node(c);
+}
+function list(items, ordered){ var t = ordered ? 'ol' : 'ul'; return '<' + t + '>' + items.map(function(i){ return '<li>' + esc(i) + '</li>'; }).join('') + '</' + t + '>'; }
+function copyCard(title, text, src){
+  var c = card(title, '', src);
+  var pre = document.createElement('pre'); pre.textContent = text;
+  var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn-small'; btn.textContent = 'Copiar texto';
+  btn.addEventListener('click', function(){
+    var fb = function(){ var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Texto seleccionado'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function(){ btn.textContent = 'Copiado'; }, fb); else fb();
+  });
+  var src2 = c.querySelector('.src');
+  c.insertBefore(pre, src2); c.insertBefore(btn, src2);
+  return c;
+}
+
+// ---------- contenido ----------
+function esMedia(){ return st.nivel === '7° básico a 2° medio' || st.nivel === '3° y 4° medio'; }
+
+var CAL = {
+  marzo: [
+    'Completar y actualizar la ficha de cada estudiante, con datos de contacto y antecedentes relevantes.',
+    'Hacer un diagnóstico del curso con una dinámica grupal en consejo de curso.',
+    'Realizar la primera reunión de apoderados, con bienvenida, forma de trabajo, normas de convivencia y horario de atención.',
+    'Definir y comunicar tu horario de atención de apoderados.',
+    'Enviar a los profesores de asignatura una síntesis de las características del curso.'
+  ],
+  regular: [
+    'Reunión de apoderados del mes, con un tema formativo además de los avisos.',
+    'Consejo de curso semanal, planificado según los ejes de Orientación.',
+    'Revisar asistencia y atrasos, y contactar a las familias cuando las ausencias se repiten.',
+    'Entrevistas con apoderados, priorizando a estudiantes con inasistencias o con baja en su rendimiento.'
+  ],
+  julio: [
+    'Preparar el reporte del curso para el consejo de evaluación del primer semestre.',
+    'Entregar a las familias la información de notas, de forma clara y personalizada.',
+    'Revisar con UTP y orientación a los estudiantes que necesitan apoyo en el segundo semestre.'
+  ],
+  septiembre2m: [
+    'Si tu curso es 2° medio, acompañar la elección entre formación humanístico-científica y técnico-profesional para 3° medio.'
+  ],
+  noviembre: [
+    'Identificar a los estudiantes en riesgo de repitencia y colaborar con UTP en el informe de cada uno.',
+    'Recoger la visión del estudiante y de su familia antes de la decisión de promoción.'
+  ],
+  diciembre: [
+    'Preparar el reporte final del curso para el consejo de evaluación.',
+    'Dejar registro de los acompañamientos que deben continuar el año siguiente.',
+    'Cerrar el año con el curso en un consejo de curso de balance.'
+  ]
+};
+var CAL_SRC = 'Educarchile, competencia "Coordinar las actividades de jefatura"; Mineduc (2018); Decreto 67, arts. 11 y 12.';
+function hitosDelMes(m){
+  var mes = MESES[m];
+  var out = [];
+  if (mes === 'marzo') out = CAL.marzo.slice();
+  else if (mes === 'julio') out = CAL.julio.concat(CAL.regular.slice(2));
+  else if (mes === 'noviembre') out = CAL.noviembre.concat(CAL.regular.slice(0, 2));
+  else if (mes === 'diciembre') out = CAL.diciembre.slice();
+  else out = CAL.regular.slice();
+  if ((mes === 'agosto' || mes === 'septiembre') && st.nivel === '7° básico a 2° medio') out = out.concat(CAL.septiembre2m);
+  return out;
+}
+
+var REUNION = {
+  'Inicio de año': {
+    formativo: 'Presentación del proyecto educativo y de las normas de convivencia, y acuerdos sobre cómo nos comunicaremos durante el año.',
+    info: 'Calendario del semestre, horario de atención, canal oficial de comunicación y elección de la directiva de apoderados.'
+  },
+  'Entrega de notas': {
+    formativo: 'Cómo acompañar el estudio en casa sin hacer las tareas por ellos. Cada familia anota un hábito que puede apoyar este mes.',
+    info: 'Resultados generales del curso, sin exponer casos individuales, y fechas para entrevistas personales.'
+  },
+  'Tema formativo': {
+    formativo: 'Actividad con las familias según un eje de Orientación. Por ejemplo, que cada apoderado escriba una carta breve destacando una cualidad de su hijo o hija, que luego se entrega al estudiante.',
+    info: 'Avisos del mes y próximas actividades del curso.'
+  },
+  'Situación del curso': {
+    formativo: 'Presentar la situación con datos generales, sin nombrar estudiantes, y construir acuerdos entre familias y escuela.',
+    info: 'Medidas que ya está tomando el establecimiento y a quién acudir en cada caso.'
+  }
+};
+
+var CONSEJO = {
+  'Crecimiento personal': {
+    nombre:'Línea de vida', min:35,
+    pasos:['Cada estudiante dibuja una línea con tres momentos importantes de su vida, sin obligación de explicarlos.', 'En parejas, quien quiera comparte uno de esos momentos y qué aprendió de él.', 'Cierre en plenario con una pregunta. ¿Qué momento te gustaría que estuviera en tu línea el próximo año?']
+  },
+  'Bienestar y autocuidado': {
+    nombre:'Mapa de mis apoyos', min:30,
+    pasos:['Cada estudiante anota a quién recurre cuando está preocupado, cuando necesita ayuda con el colegio y cuando quiere pasarlo bien.', 'En grupos pequeños comparan sin mostrar nombres. ¿Qué tipos de apoyo aparecen más y cuáles faltan?', 'Cierre presentando a los adultos del colegio a quienes pueden acudir, como el orientador o el encargado de convivencia.']
+  },
+  'Relaciones interpersonales': {
+    nombre:'Acuerdos del curso', min:40,
+    pasos:['En grupos, los estudiantes proponen acuerdos para convivir mejor en la sala.', 'La directiva del curso ordena las propuestas y el curso vota cuáles adoptar.', 'Los acuerdos se escriben en un afiche y se revisan en un mes.']
+  },
+  'Pertenencia y participación democrática': {
+    nombre:'Comisiones del curso', min:40,
+    pasos:['El curso identifica necesidades o proyectos que quiere abordar este semestre.', 'Se forman comisiones con tareas y responsables, elegidas por los propios estudiantes.', 'Cada comisión informa sus avances en el consejo de curso de cada mes.']
+  },
+  'Gestión y proyección del aprendizaje': {
+    nombre:'Mis hábitos de estudio', min:30,
+    pasos:['Cada estudiante responde una autoevaluación breve sobre cuándo, dónde y cómo estudia.', 'Elige un hábito que quiere mejorar este mes y lo escribe como meta concreta.', 'En el consejo de curso del mes siguiente revisan cómo les fue.']
+  }
+};
+
+var SEGUIMIENTO = {
+  'Inasistencias reiteradas': {
+    pasos:['Revisa el registro de asistencia y si hay justificaciones.', 'Contacta a la familia para conocer los motivos, sin juicio.', 'Coordina con los profesores de asignatura la recuperación de tareas y evaluaciones.', 'Si las ausencias siguen, informa al orientador o al equipo de convivencia para activar apoyo.'],
+    plantilla:'Estimada familia:\nLe escribo como profesor/a jefe del curso porque he notado que [nombre del estudiante] ha faltado varias veces en las últimas semanas. Me gustaría saber cómo está y si podemos apoyar de alguna forma. ¿Podríamos conversar esta semana? Mi horario de atención es [día y hora].\nSaludos cordiales.',
+    src:'Educarchile, dominio "Monitorear la situación de cada niño"; Mineduc (2021), función 1.2.'
+  },
+  'Baja de rendimiento': {
+    pasos:['Revisa las notas por asignatura y desde cuándo bajaron.', 'Conversa con el estudiante sobre cómo lo vive y qué le está costando.', 'Cita al apoderado con los datos ordenados y acuerden estrategias concretas.', 'Coordina con los profesores de asignatura y, si corresponde, con el PIE.'],
+    plantilla:'Pauta breve de entrevista\nMotivo de la entrevista.\nLo que observa el estudiante.\nLo que observa la familia.\nLo que observa el colegio.\nAcuerdos y responsables.\nFecha de revisión.',
+    src:'Educarchile, dominio "Controlar la situación académica del curso".'
+  },
+  'Situación de convivencia': {
+    pasos:['Registra los hechos de forma objetiva, con fecha y sin interpretaciones.', 'Informa al encargado de convivencia según el reglamento interno de tu establecimiento.', 'No investigues por tu cuenta. Tu rol es acompañar al curso y mantener informado al equipo.', 'Retoma el tema en consejo de curso solo si el equipo lo considera adecuado.'],
+    plantilla:'Registro de situación\nFecha y lugar.\nQué ocurrió, descrito con hechos.\nQuiénes estaban presentes (se completa en el registro oficial, no aquí).\nA quién se informó y cuándo.',
+    src:'Mineduc (2018), derivación al equipo de gestión y al orientador; Mineduc (2021), función 6.'
+  },
+  'Posible vulneración de derechos': {
+    alerta:'Si sospechas que un estudiante está siendo vulnerado en sus derechos o es víctima de un delito, informa de inmediato al equipo directivo o al encargado de convivencia y sigue el protocolo de tu establecimiento. El Código Procesal Penal (art. 175) obliga a los profesores a denunciar los delitos que afecten a sus estudiantes. No indagues por tu cuenta ni expongas al estudiante a repetir su relato.',
+    pasos:['Escucha al estudiante con calma y sin hacer preguntas que induzcan respuestas.', 'Registra textualmente lo que dijo, con fecha y hora.', 'Informa el mismo día al equipo directivo o al encargado de convivencia.', 'Sigue el protocolo del establecimiento para la denuncia y las medidas de protección.'],
+    src:'Protocolo del establecimiento; Código Procesal Penal, art. 175.'
+  },
+  'Riesgo de repitencia': {
+    pasos:['Identifica a los estudiantes que no cumplen los requisitos de promoción o que tienen una asignatura en riesgo.', 'Recoge la visión del estudiante y de su familia.', 'Colabora con UTP en el informe de cada estudiante.', 'Deja registro del acompañamiento que necesitará el año siguiente.'],
+    criterios:['El progreso en el aprendizaje durante el año.', 'La brecha entre lo logrado por el estudiante y por su curso, y sus consecuencias para el curso siguiente.', 'Las consideraciones socioemocionales que ayudan a decidir qué curso es más adecuado para su bienestar.'],
+    src:'Decreto 67 de 2018, arts. 11 y 12.'
+  }
+};
+
+var TAREAS = ['Fichas y registros del curso', 'Mensajes de apoderados', 'Entrevistas', 'Reunión de apoderados', 'Planificar consejo de curso', 'Reportes para consejo de evaluación', 'Seguimiento de asistencia', 'Casos de convivencia'];
+var ALIVIO = {
+  'Fichas y registros del curso': 'Actualiza solo los datos de contacto y alertas. El resto puede esperar al próximo hito del calendario.',
+  'Mensajes de apoderados': 'Fija un horario de respuesta y comunícalo en la próxima reunión. Fuera de ese horario, los mensajes esperan al día hábil siguiente.',
+  'Entrevistas': 'Prioriza a las familias de estudiantes con inasistencias o baja de rendimiento. Las demás pueden agendarse el mes siguiente.',
+  'Reunión de apoderados': 'Prepárala con el profesor jefe del curso paralelo y usen la misma tabla. La directiva de apoderados puede conducir la parte de avisos.',
+  'Planificar consejo de curso': 'Usa una actividad ya preparada por eje y deja que la directiva del curso conduzca la parte administrativa.',
+  'Reportes para consejo de evaluación': 'Usa el mismo formato del semestre anterior y destaca solo los casos que requieren decisión.',
+  'Seguimiento de asistencia': 'Revisa la asistencia una vez por semana, en un bloque fijo, en lugar de todos los días.',
+  'Casos de convivencia': 'Registra los hechos e informa al encargado de convivencia. Su abordaje es responsabilidad del equipo, no solo tuya.'
+};
+
+// ---------- paneles ----------
+function renderSide(){
+  if (!st.nivel) { profileEl.innerHTML = '<p class="empty">Elige tu nivel para empezar.</p>'; monthEl.innerHTML = '<p class="empty">Aparece cuando elijas tu nivel.</p>'; }
+  else {
+    profileEl.innerHTML = '<div class="kv"><span>Nivel</span><span>' + esc(st.nivel) + '</span></div><div class="kv"><span>Mes</span><span>' + MESES[mesIdx] + '</span></div>';
+    monthTitle.textContent = 'Este mes (' + MESES[mesIdx] + ')';
+    monthEl.innerHTML = list(hitosDelMes(mesIdx));
+  }
+  if (st.foco && st.foco.mes === mesIdx) focusEl.innerHTML = list(st.foco.items);
+  else focusEl.innerHTML = '<p class="empty">Usa "Priorizar mis tareas" para definirlo.</p>';
+}
+
+// ---------- flujo ----------
+function start(){
+  renderSide();
+  bot('Hola. Soy Botánica y te ayudo con la jefatura de curso, para que lo administrativo te tome menos tiempo y te quede más para tu curso.');
+  if (!st.nivel) askNivel(); else { bot('Seguimos con tu jefatura de ' + st.nivel + '.'); menu(); }
+}
+function askNivel(){
+  bot('¿En qué nivel es tu jefatura?');
+  options(['1° a 6° básico', '7° básico a 2° medio', '3° y 4° medio'], function(v){
+    st.nivel = v; save(); renderSide();
+    if (v === '1° a 6° básico') bot('Para tu nivel usaré sobre todo las orientaciones de Educarchile para profesores jefes de básica.');
+    else bot('Para tu nivel usaré sobre todo las orientaciones del Mineduc para la jefatura y la asignatura de Orientación.');
+    menu();
+  }, false);
+}
+function menu(){
+  bot('¿Qué necesitas hoy?');
+  options(['Ver mi mes', 'Preparar reunión de apoderados', 'Planificar consejo de curso', 'Seguimiento o derivación', 'Priorizar mis tareas', 'Cambiar nivel'], function(v){
+    if (v === 'Ver mi mes') verMes();
+    else if (v === 'Preparar reunión de apoderados') reunion();
+    else if (v === 'Planificar consejo de curso') consejo();
+    else if (v === 'Seguimiento o derivación') seguimiento();
+    else if (v === 'Priorizar mis tareas') priorizar();
+    else { st.nivel = ''; save(); renderSide(); askNivel(); }
+  }, false);
+}
+
+// 1. Calendario
+function verMes(m){
+  if (m === undefined) m = mesIdx;
+  card('Hitos de ' + MESES[m], list(hitosDelMes(m)), CAL_SRC);
+  bot('Es una propuesta armada desde las orientaciones oficiales. Las fechas reales dependen del calendario de tu establecimiento.', 'b-note');
+  var next = m < 11 ? m + 1 : null;
+  var opts = []; if (next !== null) opts.push('Ver ' + MESES[next]);
+  opts.push('Priorizar mis tareas');
+  options(opts, function(v){ if (v === 'Priorizar mis tareas') priorizar(); else verMes(next); });
+}
+
+// 2. Reunión de apoderados
+function reunion(){
+  bot('¿Cuál es el foco principal de la reunión?');
+  options(Object.keys(REUNION), function(foco){
+    var r = REUNION[foco];
+    var tabla = '<table class="tbl">' +
+      '<tr><td>10 min</td><td><b>Inicio.</b> Bienvenida, objetivo de la reunión y tabla.</td></tr>' +
+      '<tr><td>25 min</td><td><b>Tema formativo.</b> ' + esc(r.formativo) + '</td></tr>' +
+      '<tr><td>15 min</td><td><b>Información.</b> ' + esc(r.info) + '</td></tr>' +
+      '<tr><td>10 min</td><td><b>Cierre.</b> Acuerdos, responsables y próxima fecha.</td></tr></table>';
+    card('Tabla sugerida, 60 minutos', tabla, 'Educarchile, reuniones con inicio, desarrollo y cierre; Mineduc (2018), de lo administrativo a lo formativo.');
+    copyCard('Citación', 'Estimadas familias:\nLas invito a la reunión de apoderados del curso el día [fecha], a las [hora], en [sala]. Conversaremos sobre ' + foco.toLowerCase() + ' y acordaremos los próximos pasos del curso. Su participación es muy importante.\nSaludos cordiales,\n[Nombre], profesor/a jefe', '');
+    copyCard('Pauta de acta', 'Acta de reunión de apoderados\nFecha y curso.\nNúmero de asistentes.\nTemas tratados.\nAcuerdos.\nResponsables y plazos.\nPróxima reunión.', '');
+    bot('Si otro profesor jefe de tu nivel prepara la misma reunión, pueden compartir esta tabla y dividirse el trabajo.');
+    options(['Preparar otra reunión', 'Planificar consejo de curso'], function(v){ if (v === 'Preparar otra reunión') reunion(); else consejo(); });
+  });
+}
+
+// 3. Consejo de curso
+function consejo(){
+  bot('¿Qué eje de Orientación quieres trabajar?');
+  options(Object.keys(CONSEJO), function(eje){
+    var a = CONSEJO[eje];
+    var extra = (eje === 'Gestión y proyección del aprendizaje' && st.nivel === '7° básico a 2° medio') ? '<p>Si tu curso es 2° medio, puedes usar esta sesión para explorar las diferencias entre la formación humanístico-científica y la técnico-profesional.</p>' : '';
+    card(a.nombre + ', ' + a.min + ' minutos', list(a.pasos, true) + extra, 'Ejes de Orientación, Mineduc (2018) y Mineduc (2023). Actividad diseñada para este prototipo.');
+    bot('Dos recordatorios del Mineduc. El consejo de curso no es para recuperar materias, y los estudiantes deben tener protagonismo. Deja que la directiva conduzca la parte administrativa.', 'b-note');
+    options(['Otra actividad', 'Preparar reunión de apoderados'], function(v){ if (v === 'Otra actividad') consejo(); else reunion(); });
+  });
+}
+
+// 4. Seguimiento y derivación
+function seguimiento(){
+  bot('¿Qué situación necesitas abordar? Recuerda no escribir aquí nombres ni datos de estudiantes.');
+  options(Object.keys(SEGUIMIENTO), function(k){
+    var s = SEGUIMIENTO[k];
+    if (s.alerta) bot(s.alerta, 'b-alert');
+    card('Pasos sugeridos', list(s.pasos, true), s.src);
+    if (s.criterios) card('Criterios que debe considerar el informe', list(s.criterios), 'Decreto 67 de 2018, art. 11.');
+    if (s.plantilla) copyCard('Para usar fuera de Botánica', s.plantilla, '');
+    card('A quién derivar', list(['Orientador u orientadora, para apoyo personal, vocacional y derivación a redes externas.', 'Encargado de convivencia, para conflictos y situaciones del reglamento interno.', 'Dupla psicosocial, para situaciones familiares o sociales.', 'Equipo PIE, para necesidades educativas especiales.', 'UTP, para decisiones académicas y de promoción.']), 'Mineduc (2018); Mineduc (2023); Educarchile.');
+    options(['Otra situación', 'Priorizar mis tareas'], function(v){ if (v === 'Otra situación') seguimiento(); else priorizar(); });
+  });
+}
+
+// 5. Priorizar
+function priorizar(){
+  bot('Las orientaciones oficiales describen más tareas de las que caben en una jornada. Elegir qué hacer primero es parte del trabajo, no un incumplimiento.');
+  bot('¿Qué tareas de la jefatura te están pesando este mes? Puedes marcar varias.');
+  optionsEl.innerHTML = ''; var picked = [];
+  TAREAS.forEach(function(t){
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'btn-ghost'; b.textContent = t; b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', function(){
+      var i = picked.indexOf(t);
+      if (i === -1) { picked.push(t); b.setAttribute('aria-pressed', 'true'); } else { picked.splice(i, 1); b.setAttribute('aria-pressed', 'false'); }
+      ok.disabled = picked.length === 0;
+    });
+    optionsEl.appendChild(b);
+  });
+  var ok = document.createElement('button'); ok.type = 'button'; ok.className = 'btn-small'; ok.textContent = 'Listo'; ok.disabled = true;
+  ok.addEventListener('click', function(){
+    optionsEl.innerHTML = ''; user(picked.join(', '));
+    elegirEsenciales(picked);
+  });
+  optionsEl.appendChild(ok);
+}
+function elegirEsenciales(picked){
+  var hitos = hitosDelMes(mesIdx).slice(0, 3);
+  bot('Ahora elige como máximo dos tareas que sean esenciales este mes. Las demás las vemos para aliviarlas.');
+  var pool = hitos.concat(picked.filter(function(p){ return hitos.indexOf(p) === -1; }));
+  optionsEl.innerHTML = ''; var ess = [];
+  pool.forEach(function(t){
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'btn-ghost'; b.textContent = t; b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', function(){
+      var i = ess.indexOf(t);
+      if (i === -1) { if (ess.length >= 2) return; ess.push(t); b.setAttribute('aria-pressed', 'true'); }
+      else { ess.splice(i, 1); b.setAttribute('aria-pressed', 'false'); }
+      ok.disabled = ess.length === 0;
+    });
+    optionsEl.appendChild(b);
+  });
+  var ok = document.createElement('button'); ok.type = 'button'; ok.className = 'btn-small'; ok.textContent = 'Listo'; ok.disabled = true;
+  ok.addEventListener('click', function(){
+    optionsEl.innerHTML = ''; user(ess.join(' / '));
+    var aliviar = picked.filter(function(p){ return ess.indexOf(p) === -1; });
+    if (aliviar.length) {
+      card('Cómo aliviar lo demás', '<table class="tbl">' + aliviar.map(function(a){ return '<tr><td>' + esc(a) + '</td><td>' + esc(ALIVIO[a] || 'Puede esperar al próximo mes.') + '</td></tr>'; }).join('') + '</table>', 'Prototipo Botánica, a partir de Educarchile y Mineduc (2021).');
+    }
+    st.foco = { mes:mesIdx, items:ess }; save(); renderSide();
+    bot('Tu foco de ' + MESES[mesIdx] + ' quedó guardado en el panel. Varias de estas tareas se alivian mejor de forma colectiva, con el profesor jefe del curso paralelo, la directiva de apoderados o la directiva del curso.');
+    options(['Ver mi mes', 'Preparar reunión de apoderados'], function(v){ if (v === 'Ver mi mes') verMes(); else reunion(); });
+  });
+  optionsEl.appendChild(ok);
+}
+
+start();
+})();
+</script>
+</body>
+</html>
