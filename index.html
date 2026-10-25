@@ -74,6 +74,36 @@
   .sources { font-size:11.8px; color:var(--muted); line-height:1.5; }
   .sources li { margin-bottom:0.3rem; }
 
+  .frm { display:grid; gap:0.55rem; margin-top:0.2rem; }
+  .frm label { font-size:12.5px; font-weight:600; color:var(--muted); display:grid; gap:0.2rem; }
+  .frm input, .frm select, .frm textarea { font:inherit; font-size:13.5px; font-weight:400; color:var(--ink);
+    border:1px solid #D2D8CC; border-radius:8px; padding:0.45rem 0.6rem; background:#fff; width:100%; }
+  .frm textarea { min-height:64px; resize:vertical; }
+  .frm input:focus, .frm select:focus, .frm textarea:focus { outline:2px solid var(--green); border-color:var(--green); }
+  .frm .checks { display:grid; gap:0.25rem; font-weight:400; color:var(--ink); }
+  .frm .checks label { display:flex; gap:0.4rem; align-items:center; font-weight:400; color:var(--ink); }
+  .frm .checks input { width:auto; }
+  .frm .hint { font-size:11.8px; color:var(--muted); }
+  .row-btns { display:flex; flex-wrap:wrap; gap:8px; margin-top:0.4rem; }
+  .btn-outline { background:#fff; color:var(--green-dark); border:1px solid var(--green); padding:0.4rem 0.85rem; font-size:13px; }
+  .chart { margin:0.2rem 0 0.9rem; }
+  .chart:last-child { margin-bottom:0; }
+  .chart .ct { font-size:12px; font-weight:600; color:var(--ink); margin:0 0 0.15rem; }
+  .chart .cs { font-size:11.5px; color:var(--muted); margin:0 0 0.45rem; line-height:1.45; }
+  .vbars { display:flex; align-items:flex-end; gap:4px; height:92px; border-bottom:1px solid #C9D1C2; }
+  .vb { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%; cursor:default; }
+  .vb .v { font-size:10.5px; font-weight:600; color:var(--ink); margin-bottom:2px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .vb .bar { width:100%; max-width:22px; background:var(--green); border-radius:4px 4px 0 0; min-height:0; }
+  .vb .bar.cur { background:var(--green-dark); }
+  .vb:hover .bar { opacity:0.8; }
+  .xlab { display:flex; gap:4px; margin-top:3px; }
+  .xlab span { flex:1; min-width:0; text-align:center; font-size:10px; color:var(--muted); }
+  .hrow { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 22px; gap:6px; align-items:center; font-size:11.8px; margin-bottom:5px; }
+  .hrow .hl { color:var(--ink); line-height:1.3; }
+  .hrow .ht { height:8px; background:#E2E7DD; border-radius:4px; overflow:hidden; }
+  .hrow .hf { display:block; height:100%; background:var(--green); border-radius:0 4px 4px 0; }
+  .hrow .hv { text-align:right; font-weight:600; font-variant-numeric:tabular-nums; }
+  .b-card .chart .vbars { height:120px; }
   footer { margin-top:1.4rem; font-size:11.5px; color:var(--muted); text-align:center; line-height:1.6; }
 </style>
 </head>
@@ -106,6 +136,10 @@
         <div id="focus-box"><p class="empty">Usa "Priorizar mis tareas" para definirlo.</p></div>
       </div>
       <div class="panel">
+        <h2>Mi registro</h2>
+        <div id="registro-box"></div>
+      </div>
+      <div class="panel">
         <h2>Fuentes</h2>
         <ul class="sources">
           <li>Mineduc (2018). Orientación. Rol de la jefatura de curso, 7º básico a 2º medio.</li>
@@ -131,6 +165,94 @@
 var chatEl = document.getElementById('chat'), optionsEl = document.getElementById('options');
 var profileEl = document.getElementById('profile-box'), monthEl = document.getElementById('month-box');
 var monthTitle = document.getElementById('month-title'), focusEl = document.getElementById('focus-box');
+var registroEl = document.getElementById('registro-box');
+
+// ================= CONFIGURACIÓN POR COLEGIO =================
+// Déjalo en null para la versión general. Para un colegio, reemplaza null por un objeto como este,
+// con datos tomados de su PEI y sus reglamentos (nunca datos de estudiantes):
+// {
+//   nombre: 'Liceo ...',
+//   version: 'Reglamentos vigentes a marzo de 2027',
+//   mision: '...', vision: '...', sellos: ['...', '...'],
+//   horarioAtencion: 'Martes de 15:00 a 16:00',
+//   canalOficial: 'Agenda escolar y correo institucional',
+//   contactos: { convivencia:'Encargada de convivencia', orientacion:'Orientador', pie:'Coordinadora PIE', utp:'Jefa de UTP' },
+//   protocolos: {   // misma clave que en SEGUIMIENTO; reemplaza los pasos generales
+//     'Inasistencias reiteradas': { pasos:['...'], fuente:'Reglamento interno, art. ...' },
+//     'Situación de convivencia': { pasos:['...'], fuente:'Reglamento interno, art. ...' }
+//   },
+//   evaluacion: { fechaLimiteRepitencia:'...', criterios:['...'], fuente:'Reglamento de evaluación, art. ...' },
+//   fechas: { marzo:['Reunión de apoderados, 18 de marzo'], julio:['Consejo de evaluación, 8 de julio'] }
+// }
+var COLEGIO = {
+  nombre: 'Liceo Murialdo',
+  version: 'Reglamento Interno de Convivencia Escolar 2026 (RICE), publicado en liceomurialdo.cl',
+  mision: 'educar el corazón a través de la Iluminación Curricular, para formar buenos cristianos y honestos ciudadanos',
+  vision: 'Consolidarse como una Escuela en Pastoral inspirada en san Leonardo Murialdo',
+  sellos: ['Escuela Católica', 'Escuela Fraterna'],
+  canalOficial: 'el correo electrónico institucional, en días hábiles y horario laboral',
+  contactos: { convivencia:'Coordinadora de Convivencia Escolar', orientacion:'Orientadora del ciclo', pie:'Coordinadora PIE', utp:'Coordinación Pedagógica del ciclo' },
+  derivar: [
+    'Dirección de Ciclo, primer canal formal para activar protocolos de convivencia y de vulneración de derechos.',
+    'Coordinadora de Convivencia Escolar, cuando no se puede acceder a la Dirección de Ciclo o el caso es de extrema gravedad.',
+    'Orientadora del ciclo, para derivación interna por dificultades emocionales, relacionales, sociales o conductuales. La puede solicitar el profesor jefe.',
+    'Coordinadora PIE y educadoras diferenciales, para necesidades educativas especiales.',
+    'Coordinación Pedagógica, para decisiones académicas, notas mínimas y refuerzo.',
+    'Trabajadora social, para situaciones socioeconómicas de la familia.',
+    'Redes externas que lista el RICE. Oficina Local de la Niñez de Recoleta, CESFAM Recoleta y COSAM Recoleta. La derivación la gestiona el equipo de convivencia.'
+  ],
+  conductoRegular: 'Profesor de asignatura, profesor jefe, Dirección de Ciclo, Coordinación de Convivencia Escolar, Dirección Institucional',
+  protocolos: {
+    'Situación de convivencia': { pasos: [
+      'Quien toma conocimiento activa el protocolo el mismo día. Deja registro escrito (entrevista, correo o carta) dirigido a la Dirección de Ciclo, o a Convivencia Escolar si no puede acceder a ella.',
+      'La Dirección de Ciclo informa al Equipo de Convivencia Escolar, que conduce el proceso. Puede separar al afectado de su eventual agresor e informa a los apoderados por correo o entrevista.',
+      'Indagación preliminar en 2 días hábiles. Convivencia puede entrevistarte como profesor jefe y revisar el libro de clases y la carpeta del estudiante.',
+      'Indagación en 5 días hábiles, prorrogables por 5 más. Se notifica a las partes y se garantiza su derecho a ser oídas.',
+      'Resolución con medidas formativas, reparatorias o sancionatorias según la gradación de faltas. Se informa a los apoderados en entrevista dentro de 3 días hábiles. La apelación va al Consejo Directivo en 3 días hábiles.',
+      'Seguimiento con plan de apoyo, a cargo de Convivencia Escolar. Tu rol como profesor jefe es aportar antecedentes y acompañar, no investigar.'
+    ], fuente:'RICE 2026, Protocolo de acción ante situaciones de maltrato y/o violencia escolar, pp. 79-83' },
+    'Posible vulneración de derechos': { pasos: [
+      'Activa el protocolo el mismo día informando a la Dirección de Ciclo, o a Convivencia Escolar si no puedes acceder a ella, mediante entrevista formal.',
+      'Convivencia Escolar y la Dirección de Ciclo indagan en 5 días hábiles. Si el hecho constituye delito, la denuncia se hace dentro de 24 horas.',
+      'La orientadora del ciclo entrevista al estudiante. A ti te pueden pedir tu percepción sobre cambios de conducta, ánimo o relaciones.',
+      'Si hay señales físicas o quejas de dolor, la Dirección o Convivencia lo traslada de inmediato a un centro asistencial e informa a la familia.',
+      'Convivencia resuelve las medidas, como entrevista con el apoderado, derivación a la red (OLN, Tribunales de Familia) y plan de apoyo.',
+      'Seguimiento a cargo de la Dirección de Ciclo y Convivencia Escolar. Observa asistencia, estado de llegada y comportamiento, y repórtalo a quien te indiquen.'
+    ], fuente:'RICE 2026, Protocolo de vulneración de derechos de estudiantes, pp. 109-112' },
+    'Atrasos reiterados': { pasos: [
+      'El atraso al inicio de la jornada es una falta leve. La primera respuesta es formativa, con diálogo reflexivo y comunicación preventiva con el apoderado.',
+      'En 2° ciclo y Enseñanza Media, con más de 3 atrasos en un mes se envía un comunicado formal al apoderado pidiendo apoyo con la puntualidad.',
+      'Con 6 o más atrasos en un mes, el estudiante queda un martes del mes siguiente de 15:20 a 16:15 en hora de estudio o trabajo comunitario. El día se informa por correo.',
+      'Si persiste, conversa con la Dirección de Ciclo para revisar causas familiares o de salud antes de escalar.'
+    ], fuente:'RICE 2026, Medidas para las faltas leves, p. 164' },
+    'Inasistencias reiteradas': { pasos: [
+      'Recuerda al apoderado que la promoción exige al menos 85% de asistencia según el calendario escolar.',
+      'Cita al apoderado por correo institucional a entrevista para conocer las causas. Las ausencias a evaluaciones se justifican con certificado médico o justificación del apoderado.',
+      'Si el apoderado no asiste sin justificar, se registra y se cita de nuevo. La segunda vez corresponde amonestación escrita por correo y citación obligatoria.',
+      'Si las ausencias reiteradas sugieren negligencia, el RICE las considera vulneración del derecho a la educación. Informa a la Dirección de Ciclo para evaluar activar ese protocolo.'
+    ], fuente:'RICE 2026, pp. 11, 110, 140 y 144' },
+    'Señales de malestar emocional': { pasos: [
+      'Solicita derivación interna a la orientadora del ciclo. El RICE permite que la pida directamente el profesor jefe.',
+      'Si ves señales previas a una desregulación (agitación, aislamiento, baja tolerancia a la frustración), anticipa cambios, baja la sobreestimulación y ajusta la exigencia.',
+      'Si el estudiante se desregula sin riesgo, mantén calma, no juzgues y ofrece salir de la sala acompañado por un adulto (asistente, educadora PIE u orientadora).',
+      'Si hay riesgo para él o para otros, pide apoyo a otro educador, retira objetos peligrosos y lleva al resto del curso a otro espacio. Se informa al apoderado.',
+      'Después del episodio se deja registro escrito en el Anexo 1 del protocolo.'
+    ], fuente:'RICE 2026, derivación interna p. 171 y Protocolo de Desregulación Emocional y/o Conductual, pp. 102-105' },
+    'Conflicto con un apoderado': { pasos: [
+      'Responde solo por el correo electrónico institucional, en días hábiles y horario laboral.',
+      'Ofrece una entrevista presencial y deja registro en hoja de entrevista.',
+      'Si el apoderado no asiste sin justificar, se registra y se cita de nuevo. Si persiste, hay amonestación escrita y puede evaluarse un cambio de apoderado.',
+      'Si el conflicto escala o hay maltrato hacia ti, activa el protocolo de violencia escolar ante la Dirección de Ciclo. El RICE lo aplica también cuando afecta a docentes.'
+    ], fuente:'RICE 2026, pp. 10-11, 19 y 79' }
+  },
+  evaluacion: {
+    fechaLimiteRepitencia:'El profesor jefe informa el riesgo de repitencia al estudiante y al apoderado durante el año. Al cierre, el Consejo de Profesores con la Coordinación de Ciclo decide promoción o repitencia con acompañamiento.',
+    criterios:['Características del estudiante', 'Análisis de los resultados académicos', 'Acompañamiento del profesor jefe y de asignatura para el año siguiente', 'Acompañamiento y compromiso familiar para el año siguiente', 'Promoción con una asignatura reprobada y promedio 4.5, o dos con promedio 5.0, y al menos 85% de asistencia'],
+    fuente:'RICE 2026, Reglamento de Evaluación, numerales 9 y 10, pp. 144-145'
+  },
+  fechas: {}
+};
+// =============================================================
 
 // ---------- estado (preferencias locales) ----------
 var KEY = 'botanica_jefatura_v1';
@@ -187,45 +309,83 @@ function esMedia(){ return st.nivel === '7° básico a 2° medio' || st.nivel ==
 var CAL = {
   marzo: [
     'Completar y actualizar la ficha de cada estudiante, con datos de contacto y antecedentes relevantes.',
-    'Hacer un diagnóstico del curso con una dinámica grupal en consejo de curso.',
+    'Hacer un diagnóstico del curso con una dinámica grupal o una encuesta breve en consejo de curso.',
     'Realizar la primera reunión de apoderados, con bienvenida, forma de trabajo, normas de convivencia y horario de atención.',
-    'Definir y comunicar tu horario de atención de apoderados.',
-    'Enviar a los profesores de asignatura una síntesis de las características del curso.'
+    'Definir y comunicar tu horario de atención de apoderados y el canal oficial de comunicación.',
+    'Enviar a los profesores de asignatura una síntesis de las características del curso.',
+    'Revisar con el equipo PIE qué estudiantes del curso tienen apoyos y cómo se coordinarán.'
   ],
-  regular: [
-    'Reunión de apoderados del mes, con un tema formativo además de los avisos.',
-    'Consejo de curso semanal, planificado según los ejes de Orientación.',
-    'Revisar asistencia y atrasos, y contactar a las familias cuando las ausencias se repiten.',
-    'Entrevistas con apoderados, priorizando a estudiantes con inasistencias o con baja en su rendimiento.'
+  abril: [
+    'Constituir la directiva del curso y la directiva de apoderados, si no se hizo en marzo.',
+    'Entrevistar a las familias de los estudiantes nuevos y de quienes tuvieron dificultades el año anterior.',
+    'Planificar con la directiva los consejos de curso del semestre por ejes de Orientación.',
+    'Reunión de apoderados con un tema formativo además de los avisos.'
+  ],
+  mayo: [
+    'Revisar la asistencia del primer bimestre e identificar ausencias reiteradas.',
+    'Hacer una primera revisión de notas por asignatura con los profesores del curso.',
+    'Continuar las entrevistas con apoderados, priorizando a quienes muestran dificultades.',
+    'Reunión de apoderados y consejo de curso semanal.'
+  ],
+  junio: [
+    'Contactar a las familias de estudiantes con notas en riesgo antes del cierre del semestre.',
+    'Coordinar con los profesores de asignatura la recuperación de evaluaciones pendientes.',
+    'Reunión de apoderados y consejo de curso semanal.'
   ],
   julio: [
     'Preparar el reporte del curso para el consejo de evaluación del primer semestre.',
     'Entregar a las familias la información de notas, de forma clara y personalizada.',
-    'Revisar con UTP y orientación a los estudiantes que necesitan apoyo en el segundo semestre.'
+    'Revisar con UTP y orientación a los estudiantes que necesitan apoyo en el segundo semestre.',
+    'Antes de vacaciones, hacer un consejo de curso de balance del semestre.'
   ],
-  septiembre2m: [
-    'Si tu curso es 2° medio, acompañar la elección entre formación humanístico-científica y técnico-profesional para 3° medio.'
+  agosto: [
+    'Iniciar el segundo semestre con un consejo de curso de metas.',
+    'Reunión de apoderados con los resultados del primer semestre y acuerdos para el segundo.',
+    'Revisar con orientación y PIE los apoyos del semestre.'
+  ],
+  septiembre: [
+    'Revisar asistencia y notas parciales del semestre.',
+    'Organizar con la directiva la participación del curso en actividades del mes, repartiendo tareas.',
+    'Reunión de apoderados y consejo de curso semanal.'
+  ],
+  octubre: [
+    'Avisar a tiempo a las familias de estudiantes con riesgo de repitencia.',
+    'Entrevistar a los apoderados de estudiantes con dificultades académicas o de asistencia.',
+    'Reunión de apoderados y consejo de curso semanal.'
   ],
   noviembre: [
     'Identificar a los estudiantes en riesgo de repitencia y colaborar con UTP en el informe de cada uno.',
-    'Recoger la visión del estudiante y de su familia antes de la decisión de promoción.'
+    'Recoger la visión del estudiante y de su familia antes de la decisión de promoción.',
+    'Reunión de apoderados de cierre, con balance del año.'
   ],
   diciembre: [
     'Preparar el reporte final del curso para el consejo de evaluación.',
     'Dejar registro de los acompañamientos que deben continuar el año siguiente.',
+    'Entregar al próximo profesor jefe una síntesis del curso, si el curso cambia de jefatura.',
     'Cerrar el año con el curso en un consejo de curso de balance.'
   ]
 };
-var CAL_SRC = 'Educarchile, competencia "Coordinar las actividades de jefatura"; Mineduc (2018); Decreto 67, arts. 11 y 12.';
+var CAL_NIVEL = {
+  '1° a 6° básico': {
+    marzo: ['Acordar con las familias rutinas de organización de materiales y lectura en casa.'],
+    agosto: ['Reforzar con las familias los hábitos de estudio para el segundo semestre.']
+  },
+  '7° básico a 2° medio': {
+    agosto: ['Si tu curso es 2° medio, informar a estudiantes y familias sobre la elección entre formación humanístico-científica y técnico-profesional.'],
+    septiembre: ['Si tu curso es 2° medio, acompañar la decisión de cada estudiante sobre su formación en 3° medio.']
+  },
+  '3° y 4° medio': {
+    abril: ['Si tu curso es 4° medio, informar a estudiantes y familias sobre el proceso de admisión a la educación superior y sus plazos.'],
+    octubre: ['Si tu curso es 4° medio, considera que su año termina antes. Coordina con UTP el cierre de notas y la licenciatura.']
+  }
+};
+var CAL_SRC = 'Educarchile, competencia "Coordinar las actividades de jefatura"; Mineduc (2018); Mineduc (2021); Decreto 67, arts. 11 y 12.';
 function hitosDelMes(m){
   var mes = MESES[m];
-  var out = [];
-  if (mes === 'marzo') out = CAL.marzo.slice();
-  else if (mes === 'julio') out = CAL.julio.concat(CAL.regular.slice(2));
-  else if (mes === 'noviembre') out = CAL.noviembre.concat(CAL.regular.slice(0, 2));
-  else if (mes === 'diciembre') out = CAL.diciembre.slice();
-  else out = CAL.regular.slice();
-  if ((mes === 'agosto' || mes === 'septiembre') && st.nivel === '7° básico a 2° medio') out = out.concat(CAL.septiembre2m);
+  var out = (CAL[mes] || []).slice();
+  var extra = CAL_NIVEL[st.nivel] && CAL_NIVEL[st.nivel][mes];
+  if (extra) out = out.concat(extra);
+  if (COLEGIO && COLEGIO.fechas && COLEGIO.fechas[mes]) out = COLEGIO.fechas[mes].map(function(f){ return 'Fecha de tu colegio. ' + f; }).concat(out);
   return out;
 }
 
@@ -238,15 +398,38 @@ var REUNION = {
     formativo: 'Cómo acompañar el estudio en casa sin hacer las tareas por ellos. Cada familia anota un hábito que puede apoyar este mes.',
     info: 'Resultados generales del curso, sin exponer casos individuales, y fechas para entrevistas personales.'
   },
+  'Asistencia y puntualidad': {
+    formativo: 'Por qué cada día de clases cuenta. En grupos, las familias identifican qué dificulta llegar a tiempo y proponen apoyos entre ellas, como turnos para traer a los niños.',
+    info: 'Asistencia general del curso, sin nombrar estudiantes, y qué hacer cuando un estudiante debe faltar.'
+  },
+  'Convivencia y redes sociales': {
+    formativo: 'Cómo acompañar el uso de redes y grupos de mensajería de los estudiantes. Las familias acuerdan dos o tres criterios comunes para el curso.',
+    info: 'Normas de convivencia del reglamento interno y a quién recurrir ante una situación.'
+  },
   'Tema formativo': {
     formativo: 'Actividad con las familias según un eje de Orientación. Por ejemplo, que cada apoderado escriba una carta breve destacando una cualidad de su hijo o hija, que luego se entrega al estudiante.',
     info: 'Avisos del mes y próximas actividades del curso.'
   },
+  'Orientación vocacional': {
+    formativo: 'Cómo acompañar las decisiones sobre el futuro sin imponerlas. Las familias conversan sobre qué intereses ven en sus hijos y cómo apoyarlos.',
+    info: 'Fechas relevantes del proceso de elección o de admisión que corresponda al nivel del curso.',
+    soloMedia: true
+  },
   'Situación del curso': {
     formativo: 'Presentar la situación con datos generales, sin nombrar estudiantes, y construir acuerdos entre familias y escuela.',
     info: 'Medidas que ya está tomando el establecimiento y a quién acudir en cada caso.'
+  },
+  'Cierre de año': {
+    formativo: 'Balance del año con las familias. Qué logró el curso, qué fue difícil y qué conviene sostener el próximo año.',
+    info: 'Fechas de término, entrega de documentos, situación de promoción y matrícula.'
   }
 };
+var REUNION_TIPS = [
+  'Asigna a un apoderado o a la directiva la presentación de un tema. La reunión se vuelve más participativa y no recae todo en ti.',
+  'Usa grupos pequeños para el tema formativo, en lugar de una exposición larga.',
+  'Deja los casos individuales para entrevistas. En la reunión solo se habla del curso.',
+  'Al final, pide a las familias una evaluación breve de la reunión para mejorar la siguiente.'
+];
 
 var CONSEJO = {
   'Crecimiento personal': {
@@ -292,6 +475,31 @@ var SEGUIMIENTO = {
     pasos:['Escucha al estudiante con calma y sin hacer preguntas que induzcan respuestas.', 'Registra textualmente lo que dijo, con fecha y hora.', 'Informa el mismo día al equipo directivo o al encargado de convivencia.', 'Sigue el protocolo del establecimiento para la denuncia y las medidas de protección.'],
     src:'Protocolo del establecimiento; Código Procesal Penal, art. 175.'
   },
+  'Atrasos reiterados': {
+    pasos:['Revisa el registro de atrasos y si se concentran en ciertos días o bloques.', 'Conversa con el estudiante sobre qué le dificulta llegar a tiempo.', 'Contacta a la familia para buscar una solución concreta, como un cambio de rutina o de traslado.', 'Si persisten, aplica lo que indica el reglamento interno e informa a inspectoría.'],
+    plantilla:'Estimada familia:\nLe escribo porque [nombre del estudiante] ha llegado atrasado/a varias veces en las últimas semanas. Me gustaría conversar para entender qué está pasando y buscar juntos una solución. ¿Podríamos hablar esta semana?\nSaludos cordiales.',
+    src:'Educarchile, dominio "Monitorear la situación de cada niño"; reglamento interno del establecimiento.'
+  },
+  'Ausencia prolongada por salud': {
+    pasos:['Contacta a la familia para saber cómo está el estudiante y cuánto se extenderá la ausencia.', 'Informa a los profesores de asignatura y a UTP para coordinar materiales y plazos.', 'Si el curso trabaja en grupos de apoyo, pide a sus compañeros que le hagan llegar los contenidos.', 'Al regreso, acuerda con UTP un calendario de evaluaciones pendientes.'],
+    plantilla:'Estimada familia:\nEsperamos que [nombre del estudiante] se recupere pronto. Para que no se atrase, coordinaré con los profesores el envío de materiales. Cuando regrese, acordaremos un calendario para las evaluaciones pendientes. Cualquier cosa que necesiten, quedo atento/a.\nSaludos cordiales.',
+    src:'Educarchile, ejemplo de grupos de apoyo ante inasistencias por salud; Mineduc (2021), función 1.2.'
+  },
+  'Estudiante nuevo en el curso': {
+    pasos:['Entrevista a la familia para conocer su trayectoria escolar y sus necesidades.', 'Presenta al estudiante al curso y asígnale un compañero que lo acompañe las primeras semanas.', 'Informa a los profesores de asignatura y, si corresponde, al equipo PIE.', 'Conversa con el estudiante después de dos o tres semanas para ver cómo se ha integrado.'],
+    plantilla:'Pauta de bienvenida\nEntrevista inicial con la familia (fecha).\nCompañero acompañante.\nProfesores informados.\nApoyos necesarios.\nConversación de seguimiento (fecha).',
+    src:'Educarchile, competencia "Involucrar colaborativamente a los apoderados"; Mineduc (2021), funciones 1.1 y 2.'
+  },
+  'Conflicto con un apoderado': {
+    pasos:['Responde por escrito solo lo necesario y propón conversar en persona, en tu horario de atención.', 'Si la situación es tensa, pide que te acompañe UTP, inspectoría o el encargado de convivencia.', 'En la entrevista escucha primero, describe hechos y busca acuerdos concretos.', 'Registra lo conversado y los acuerdos, y entrega una copia si el reglamento lo indica.'],
+    plantilla:'Estimado/a apoderado/a:\nGracias por su mensaje. Para conversarlo con calma, le propongo una entrevista el [día] a las [hora] en el colegio. Me acompañará [cargo] para que podamos encontrar juntos la mejor solución.\nSaludos cordiales.',
+    src:'Educarchile, dominio "Comprometer a la familia en el proceso educativo"; reglamento interno del establecimiento.'
+  },
+  'Señales de malestar emocional': {
+    alerta:'Si un estudiante expresa ideas de hacerse daño o de quitarse la vida, no lo dejes solo, activa de inmediato el protocolo del establecimiento e informa al equipo directivo o de convivencia. En Chile, la Línea *4141 atiende gratis las 24 horas y Salud Responde está en el 600 360 7777.',
+    pasos:['Registra lo que observas con hechos concretos, como cambios de ánimo, aislamiento o baja asistencia.', 'Conversa en privado con el estudiante, con calma y sin juzgar. Escucha más de lo que hablas.', 'Informa el mismo día al orientador o al encargado de convivencia, según el protocolo.', 'Acuerda con el equipo quién contacta a la familia y cómo se hará el seguimiento.'],
+    src:'Mineduc (2023), principio de bienestar, convivencia y salud mental; protocolo del establecimiento.'
+  },
   'Riesgo de repitencia': {
     pasos:['Identifica a los estudiantes que no cumplen los requisitos de promoción o que tienen una asignatura en riesgo.', 'Recoge la visión del estudiante y de su familia.', 'Colabora con UTP en el informe de cada estudiante.', 'Deja registro del acompañamiento que necesitará el año siguiente.'],
     criterios:['El progreso en el aprendizaje durante el año.', 'La brecha entre lo logrado por el estudiante y por su curso, y sus consecuencias para el curso siguiente.', 'Las consideraciones socioemocionales que ayudan a decidir qué curso es más adecuado para su bienestar.'],
@@ -299,7 +507,7 @@ var SEGUIMIENTO = {
   }
 };
 
-var TAREAS = ['Fichas y registros del curso', 'Mensajes de apoderados', 'Entrevistas', 'Reunión de apoderados', 'Planificar consejo de curso', 'Reportes para consejo de evaluación', 'Seguimiento de asistencia', 'Casos de convivencia'];
+var TAREAS = ['Fichas y registros del curso', 'Mensajes de apoderados', 'Entrevistas', 'Reunión de apoderados', 'Planificar consejo de curso', 'Reportes para consejo de evaluación', 'Seguimiento de asistencia', 'Casos de convivencia', 'Coordinación con profesores de asignatura', 'Actividades y celebraciones del curso', 'Plataformas y registros digitales', 'Derivaciones y seguimiento de casos'];
 var ALIVIO = {
   'Fichas y registros del curso': 'Actualiza solo los datos de contacto y alertas. El resto puede esperar al próximo hito del calendario.',
   'Mensajes de apoderados': 'Fija un horario de respuesta y comunícalo en la próxima reunión. Fuera de ese horario, los mensajes esperan al día hábil siguiente.',
@@ -308,7 +516,11 @@ var ALIVIO = {
   'Planificar consejo de curso': 'Usa una actividad ya preparada por eje y deja que la directiva del curso conduzca la parte administrativa.',
   'Reportes para consejo de evaluación': 'Usa el mismo formato del semestre anterior y destaca solo los casos que requieren decisión.',
   'Seguimiento de asistencia': 'Revisa la asistencia una vez por semana, en un bloque fijo, en lugar de todos los días.',
-  'Casos de convivencia': 'Registra los hechos e informa al encargado de convivencia. Su abordaje es responsabilidad del equipo, no solo tuya.'
+  'Casos de convivencia': 'Registra los hechos e informa al encargado de convivencia. Su abordaje es responsabilidad del equipo, no solo tuya.',
+  'Coordinación con profesores de asignatura': 'Envía un solo correo mensual con la síntesis del curso y las fechas importantes, en lugar de varios mensajes sueltos. Puedes usar "Redactar un texto".',
+  'Actividades y celebraciones del curso': 'Delega la organización en comisiones de estudiantes y en la directiva de apoderados. Tu rol es aprobar y acompañar, no ejecutar.',
+  'Plataformas y registros digitales': 'Agrupa los registros en un bloque fijo de la semana dentro de tu jornada. Pregunta a UTP cuáles son obligatorios y con qué plazo.',
+  'Derivaciones y seguimiento de casos': 'Una vez hecha la derivación, el seguimiento lo lidera el equipo de apoyo. Acuerda con ellos una fecha de revisión en vez de estar pendiente cada día.'
 };
 
 // ---------- paneles ----------
@@ -321,6 +533,7 @@ function renderSide(){
   }
   if (st.foco && st.foco.mes === mesIdx) focusEl.innerHTML = list(st.foco.items);
   else focusEl.innerHTML = '<p class="empty">Usa "Priorizar mis tareas" para definirlo.</p>';
+  registroEl.innerHTML = registroHTML();
 }
 
 // ---------- flujo ----------
@@ -340,12 +553,16 @@ function askNivel(){
 }
 function menu(){
   bot('¿Qué necesitas hoy?');
-  options(['Ver mi mes', 'Preparar reunión de apoderados', 'Planificar consejo de curso', 'Seguimiento o derivación', 'Priorizar mis tareas', 'Cambiar nivel'], function(v){
+  options(['Ver mi mes', 'Llevar a mi calendario', 'Redactar un texto', 'Preparar reunión de apoderados', 'Planificar consejo de curso', 'Seguimiento o derivación', 'Priorizar mis tareas', 'Mi registro', 'Qué es Botánica', 'Cambiar nivel'], function(v){
     if (v === 'Ver mi mes') verMes();
+    else if (v === 'Llevar a mi calendario') exportarCalendario();
+    else if (v === 'Redactar un texto') redactar();
     else if (v === 'Preparar reunión de apoderados') reunion();
     else if (v === 'Planificar consejo de curso') consejo();
     else if (v === 'Seguimiento o derivación') seguimiento();
     else if (v === 'Priorizar mis tareas') priorizar();
+    else if (v === 'Qué es Botánica') acerca();
+    else if (v === 'Mi registro') verRegistro();
     else { st.nivel = ''; save(); renderSide(); askNivel(); }
   }, false);
 }
@@ -364,8 +581,9 @@ function verMes(m){
 // 2. Reunión de apoderados
 function reunion(){
   bot('¿Cuál es el foco principal de la reunión?');
-  options(Object.keys(REUNION), function(foco){
+  options(Object.keys(REUNION).filter(function(k){ return !REUNION[k].soloMedia || esMedia(); }), function(foco){
     var r = REUNION[foco];
+    if (COLEGIO && foco === 'Inicio de año' && COLEGIO.mision) r = { formativo: 'Presentación de la misión del colegio, "' + COLEGIO.mision + '", y de sus normas de convivencia. Cada familia comenta qué espera del año.', info: r.info + (COLEGIO.horarioAtencion ? ' Horario de atención, ' + COLEGIO.horarioAtencion + '.' : '') + (COLEGIO.canalOficial ? ' Canal oficial, ' + COLEGIO.canalOficial + '.' : '') };
     var tabla = '<table class="tbl">' +
       '<tr><td>10 min</td><td><b>Inicio.</b> Bienvenida, objetivo de la reunión y tabla.</td></tr>' +
       '<tr><td>25 min</td><td><b>Tema formativo.</b> ' + esc(r.formativo) + '</td></tr>' +
@@ -374,20 +592,53 @@ function reunion(){
     card('Tabla sugerida, 60 minutos', tabla, 'Educarchile, reuniones con inicio, desarrollo y cierre; Mineduc (2018), de lo administrativo a lo formativo.');
     copyCard('Citación', 'Estimadas familias:\nLas invito a la reunión de apoderados del curso el día [fecha], a las [hora], en [sala]. Conversaremos sobre ' + foco.toLowerCase() + ' y acordaremos los próximos pasos del curso. Su participación es muy importante.\nSaludos cordiales,\n[Nombre], profesor/a jefe', '');
     copyCard('Pauta de acta', 'Acta de reunión de apoderados\nFecha y curso.\nNúmero de asistentes.\nTemas tratados.\nAcuerdos.\nResponsables y plazos.\nPróxima reunión.', '');
+    card('Para que la reunión funcione', list(REUNION_TIPS), 'Educarchile, competencia "Involucrar colaborativamente a los apoderados".');
     bot('Si otro profesor jefe de tu nivel prepara la misma reunión, pueden compartir esta tabla y dividirse el trabajo.');
-    options(['Preparar otra reunión', 'Planificar consejo de curso'], function(v){ if (v === 'Preparar otra reunión') reunion(); else consejo(); });
+    askAhorro('Reunión de apoderados', function(){ options(['Preparar otra reunión', 'Planificar consejo de curso'], function(v){ if (v === 'Preparar otra reunión') reunion(); else consejo(); }); });
   });
 }
 
 // 3. Consejo de curso
+var CONSEJO_MAS = {
+  'Crecimiento personal': [
+    { nombre:'Carta para fin de año', min:30, pasos:['Cada estudiante escribe una carta para sí mismo sobre lo que quiere lograr este año, lo que le preocupa y a quién podría pedir ayuda.', 'Cierra la carta en un sobre con su nombre. La directiva del curso los guarda.', 'En diciembre se devuelven los sobres y cada uno compara lo que escribió con lo que vivió.'] },
+    { nombre:'Fortalezas del curso', min:35, pasos:['Cada estudiante recibe una hoja con su nombre, que circula por la sala.', 'Los compañeros escriben en cada hoja una fortaleza concreta de esa persona. Solo se permiten comentarios positivos.', 'Cada uno lee su hoja y elige una fortaleza que quiere seguir desarrollando.'] }
+  ],
+  'Bienestar y autocuidado': [
+    { nombre:'Semáforo del estrés', min:30, pasos:['Cada estudiante identifica sus señales de estrés en verde (tranquilo), amarillo (tenso) y rojo (desbordado).', 'En grupos proponen qué hacer en cada color, por ejemplo una pausa, hablar con alguien o pedir ayuda.', 'Cierre recordando a qué adulto del colegio acudir cuando alguien está en rojo.'] },
+    { nombre:'Rutinas que nos hacen bien', min:35, pasos:['El curso responde una encuesta anónima breve sobre sueño, uso de pantallas y actividad física.', 'La directiva presenta los resultados del curso en conjunto, sin respuestas individuales.', 'El curso acuerda un desafío común por dos semanas y lo revisa en el próximo consejo.'] }
+  ],
+  'Relaciones interpersonales': [
+    { nombre:'Resolver un conflicto en cuatro pasos', min:40, pasos:['Se presenta un caso ficticio de conflicto entre compañeros.', 'En grupos lo resuelven con cuatro pasos. Describir los hechos, decir cómo me siento, escuchar al otro y buscar un acuerdo.', 'Algunos grupos lo dramatizan y el curso comenta qué funcionó.'] },
+    { nombre:'Escucha en parejas', min:30, pasos:['En parejas, uno cuenta durante dos minutos algo que le gusta hacer. El otro escucha sin interrumpir.', 'Quien escuchó resume lo que entendió. Luego cambian de rol.', 'Cierre con una pregunta. ¿Cómo se sintieron al ser escuchados sin interrupciones?'] }
+  ],
+  'Pertenencia y participación democrática': [
+    { nombre:'Asamblea del curso', min:40, pasos:['La directiva prepara una tabla con los temas que el curso quiere discutir.', 'Se conversa con turnos de palabra y se vota una propuesta concreta.', 'El secretario del curso registra los acuerdos en un acta. El profesor modera solo si es necesario.'] },
+    { nombre:'Proyecto solidario', min:40, pasos:['El curso identifica una necesidad del colegio o del barrio.', 'Se elige una por votación y se definen los pasos, los responsables y las fechas.', 'Cada mes, en el consejo de curso, se revisa cómo avanza.'] }
+  ],
+  'Gestión y proyección del aprendizaje': [
+    { nombre:'Planificar la semana de pruebas', min:30, pasos:['Cada estudiante anota sus próximas evaluaciones en un calendario semanal.', 'Distribuye el estudio en bloques cortos y realistas, sin dejar todo para el último día.', 'En parejas comparten qué estrategia de estudio les ha funcionado mejor.'] },
+    { nombre:'Explorar mis intereses', min:40, pasos:['Cada estudiante anota actividades que disfruta y en las que siente que le va bien.', 'Las relaciona con áreas de estudio o de trabajo, con ayuda del profesor.', 'Investiga una carrera, un oficio o una especialidad que le llame la atención y la presenta brevemente al curso.'] }
+  ]
+};
+function actividadesDe(eje){ return [CONSEJO[eje]].concat(CONSEJO_MAS[eje] || []); }
 function consejo(){
   bot('¿Qué eje de Orientación quieres trabajar?');
-  options(Object.keys(CONSEJO), function(eje){
-    var a = CONSEJO[eje];
-    var extra = (eje === 'Gestión y proyección del aprendizaje' && st.nivel === '7° básico a 2° medio') ? '<p>Si tu curso es 2° medio, puedes usar esta sesión para explorar las diferencias entre la formación humanístico-científica y la técnico-profesional.</p>' : '';
-    card(a.nombre + ', ' + a.min + ' minutos', list(a.pasos, true) + extra, 'Ejes de Orientación, Mineduc (2018) y Mineduc (2023). Actividad diseñada para este prototipo.');
-    bot('Dos recordatorios del Mineduc. El consejo de curso no es para recuperar materias, y los estudiantes deben tener protagonismo. Deja que la directiva conduzca la parte administrativa.', 'b-note');
-    options(['Otra actividad', 'Preparar reunión de apoderados'], function(v){ if (v === 'Otra actividad') consejo(); else reunion(); });
+  options(Object.keys(CONSEJO), function(eje){ mostrarActividad(eje); });
+}
+function mostrarActividad(eje){
+  var lista = actividadesDe(eje);
+  st.cIdx = st.cIdx || {};
+  var i = (st.cIdx[eje] || 0) % lista.length;
+  st.cIdx[eje] = i + 1; save();
+  var a = lista[i];
+  var extra = (eje === 'Gestión y proyección del aprendizaje' && st.nivel === '7° básico a 2° medio' && i === 0) ? '<p>Si tu curso es 2° medio, puedes usar esta sesión para explorar las diferencias entre la formación humanístico-científica y la técnico-profesional.</p>' : '';
+  card(a.nombre + ', ' + a.min + ' minutos', list(a.pasos, true) + extra + '<p style="font-size:12px;color:#5F6B55;margin:0.3rem 0 0">Actividad ' + (i + 1) + ' de ' + lista.length + ' del eje ' + esc(eje.toLowerCase()) + '.</p>', 'Ejes de Orientación, Mineduc (2018) y Mineduc (2023). Actividad diseñada para este prototipo.');
+  if (i === 0) bot('Dos recordatorios del Mineduc. El consejo de curso no es para recuperar materias, y los estudiantes deben tener protagonismo. Deja que la directiva conduzca la parte administrativa.', 'b-note');
+  options(['Otra actividad de este eje', 'Cambiar de eje', 'Preparar reunión de apoderados'], function(v){
+    if (v === 'Otra actividad de este eje') mostrarActividad(eje);
+    else if (v === 'Cambiar de eje') consejo();
+    else reunion();
   });
 }
 
@@ -397,10 +648,16 @@ function seguimiento(){
   options(Object.keys(SEGUIMIENTO), function(k){
     var s = SEGUIMIENTO[k];
     if (s.alerta) bot(s.alerta, 'b-alert');
-    card('Pasos sugeridos', list(s.pasos, true), s.src);
-    if (s.criterios) card('Criterios que debe considerar el informe', list(s.criterios), 'Decreto 67 de 2018, art. 11.');
+    var propio = COLEGIO && COLEGIO.protocolos && COLEGIO.protocolos[k];
+    if (propio) card('Pasos según el protocolo de tu colegio', list(propio.pasos, true), propio.fuente + (COLEGIO.version ? '. ' + COLEGIO.version : '') + '. Ante dudas, prima el documento oficial.');
+    else card('Pasos sugeridos', list(s.pasos, true), s.src);
+    if (s.criterios) {
+      var ev = COLEGIO && COLEGIO.evaluacion;
+      card('Criterios que debe considerar el informe', list(s.criterios.concat(ev && ev.criterios ? ev.criterios : [])) + (ev && ev.fechaLimiteRepitencia ? '<p><b>Plazo en tu colegio.</b> ' + esc(ev.fechaLimiteRepitencia) + '</p>' : ''), 'Decreto 67 de 2018, art. 11' + (ev && ev.fuente ? '; ' + ev.fuente : '') + '.');
+    }
     if (s.plantilla) copyCard('Para usar fuera de Botánica', s.plantilla, '');
-    card('A quién derivar', list(['Orientador u orientadora, para apoyo personal, vocacional y derivación a redes externas.', 'Encargado de convivencia, para conflictos y situaciones del reglamento interno.', 'Dupla psicosocial, para situaciones familiares o sociales.', 'Equipo PIE, para necesidades educativas especiales.', 'UTP, para decisiones académicas y de promoción.']), 'Mineduc (2018); Mineduc (2023); Educarchile.');
+    if (COLEGIO && COLEGIO.derivar) card('A quién derivar en tu colegio', list(COLEGIO.derivar) + (COLEGIO.conductoRegular ? '<p><b>Conducto regular.</b> ' + esc(COLEGIO.conductoRegular) + '.</p>' : ''), COLEGIO.version + '.');
+    else card('A quién derivar', list(['Orientador u orientadora, para apoyo personal, vocacional y derivación a redes externas.', 'Encargado de convivencia, para conflictos y situaciones del reglamento interno.', 'Dupla psicosocial, para situaciones familiares o sociales.', 'Equipo PIE, para necesidades educativas especiales.', 'UTP, para decisiones académicas y de promoción.']), 'Mineduc (2018); Mineduc (2023); Educarchile.');
     options(['Otra situación', 'Priorizar mis tareas'], function(v){ if (v === 'Otra situación') seguimiento(); else priorizar(); });
   });
 }
@@ -422,9 +679,16 @@ function priorizar(){
   var ok = document.createElement('button'); ok.type = 'button'; ok.className = 'btn-small'; ok.textContent = 'Listo'; ok.disabled = true;
   ok.addEventListener('click', function(){
     optionsEl.innerHTML = ''; user(picked.join(', '));
+    st.pesadas = st.pesadas || []; st.pesadas.push({ mes:mesIdx, tareas:picked.slice() }); save(); renderSide();
     elegirEsenciales(picked);
   });
   optionsEl.appendChild(ok);
+  addHome();
+}
+function addHome(){
+  var h = document.createElement('button'); h.type = 'button'; h.className = 'btn-home'; h.textContent = 'Volver al menú';
+  h.addEventListener('click', function(){ optionsEl.innerHTML = ''; user('Volver al menú'); menu(); });
+  optionsEl.appendChild(h);
 }
 function elegirEsenciales(picked){
   var hitos = hitosDelMes(mesIdx).slice(0, 3);
@@ -455,6 +719,220 @@ function elegirEsenciales(picked){
   optionsEl.appendChild(ok);
 }
 
+// ---------- Mi registro (gráficos, solo en este dispositivo) ----------
+var MES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+var AHORRO_OPC = { 'Nada':0, '5 minutos':5, '15 minutos':15, '30 minutos o más':30 };
+function askAhorro(tipo, next){
+  bot('¿Cuánto tiempo crees que te ahorró esto?');
+  options(Object.keys(AHORRO_OPC), function(v){
+    st.ahorro = st.ahorro || []; st.ahorro.push({ mes:mesIdx, min:AHORRO_OPC[v], tipo:tipo }); save(); renderSide();
+    if (AHORRO_OPC[v] > 0) bot('Anotado. Lo verás sumado en "Mi registro".');
+    next();
+  });
+}
+function fmtMin(m){ if (!m) return '0'; if (m < 60) return m + ' min'; var h = Math.round(m / 6) / 10; return String(h).replace('.', ',') + ' h'; }
+function vChart(vals, labels, curIdx, fmt, title){
+  var max = Math.max.apply(null, vals.concat([1]));
+  var bars = vals.map(function(v, i){
+    var pct = v ? Math.max(3, Math.round(v / max * 100)) : 0;
+    return '<div class="vb" title="' + esc(title(i, v)) + '"><span class="v">' + (v ? esc(fmt(v)) : '') + '</span><span class="bar' + (i === curIdx ? ' cur' : '') + '" style="height:' + pct + '%"></span></div>';
+  }).join('');
+  return '<div class="vbars" role="img" aria-label="' + esc(vals.map(function(v, i){ return labels[i] + ' ' + fmt(v); }).join(', ')) + '">' + bars + '</div><div class="xlab">' + labels.map(function(l){ return '<span>' + l + '</span>'; }).join('') + '</div>';
+}
+function hChart(rows){
+  var max = Math.max.apply(null, rows.map(function(r){ return r[1]; }).concat([1]));
+  return rows.map(function(r){ return '<div class="hrow" title="' + esc(r[0] + ', ' + r[1] + (r[1] === 1 ? ' vez' : ' veces')) + '"><span class="hl">' + esc(r[0]) + '</span><span class="ht"><span class="hf" style="width:' + Math.round(r[1] / max * 100) + '%"></span></span><span class="hv">' + r[1] + '</span></div>'; }).join('');
+}
+function datosRegistro(){
+  var meses = [2,3,4,5,6,7,8,9,10,11];
+  var ahorro = meses.map(function(m){ return (st.ahorro || []).filter(function(a){ return a.mes === m; }).reduce(function(t, a){ return t + a.min; }, 0); });
+  var total = ahorro.reduce(function(a, b){ return a + b; }, 0);
+  var cnt = {}; (st.pesadas || []).forEach(function(p){ p.tareas.forEach(function(t){ cnt[t] = (cnt[t] || 0) + 1; }); });
+  var top = Object.keys(cnt).map(function(k){ return [k, cnt[k]]; }).sort(function(a, b){ return b[1] - a[1]; }).slice(0, 5);
+  var carga = meses.map(function(m){ return hitosDelMes(m).length; });
+  return { meses:meses, ahorro:ahorro, total:total, top:top, carga:carga, usos:(st.ahorro || []).length };
+}
+function registroHTML(){
+  if (!st.nivel) return '<p class="empty">Aparece cuando elijas tu nivel.</p>';
+  var d = datosRegistro(), labels = d.meses.map(function(m){ return MES_CORTO[m]; }), cur = d.meses.indexOf(mesIdx);
+  var h = '<div class="chart"><p class="ct">Tiempo ahorrado por mes</p>';
+  h += d.total ? '<p class="cs">' + fmtMin(d.total) + ' en total, según lo que tú reportaste.</p>' + vChart(d.ahorro, labels, cur, fmtMin, function(i, v){ return MESES[d.meses[i]] + ', ' + fmtMin(v) + ' ahorrados'; })
+               : '<p class="cs">Se completa cuando respondas cuánto tiempo te ahorró un texto o una reunión.</p>';
+  h += '</div><div class="chart"><p class="ct">Mis tareas más pesadas</p>';
+  h += d.top.length ? '<p class="cs">Veces que las marcaste en "Priorizar mis tareas".</p>' + hChart(d.top) : '<p class="cs">Se completa cuando uses "Priorizar mis tareas".</p>';
+  h += '</div><div class="chart"><p class="ct">Carga de la jefatura en el año</p><p class="cs">Número de hitos de cada mes. El mes actual va más oscuro.</p>' +
+       vChart(d.carga, labels, cur, function(v){ return String(v); }, function(i, v){ return MESES[d.meses[i]] + ', ' + v + ' hitos'; }) + '</div>';
+  return h;
+}
+function verRegistro(){
+  card('Mi registro', registroHTML() + '<p class="cs">Estos datos se guardan solo en este dispositivo.</p>', '');
+  var d = datosRegistro();
+  if (d.total || d.top.length) {
+    var txt = 'Registro personal de jefatura de curso' + (st.curso ? ' (' + st.curso + ')' : '') + '\n' +
+      (d.total ? 'Tiempo ahorrado con apoyo de Botánica, ' + fmtMin(d.total) + ' en ' + d.usos + (d.usos === 1 ? ' uso.' : ' usos.') + '\n' : '') +
+      (d.top.length ? 'Tareas que más me han pesado, ' + d.top.map(function(t){ return t[0].toLowerCase(); }).join(', ') + '.\n' : '') +
+      'Me gustaría conversar cómo organizar mejor estas tareas.';
+    copyCard('Resumen para compartir', txt, '');
+    bot('Este resumen es tuyo. Puedes llevarlo a UTP o a tu jefatura si quieres.', 'b-note');
+  }
+  options(['Priorizar mis tareas', 'Redactar un texto'], function(v){ if (v === 'Priorizar mis tareas') priorizar(); else redactar(); });
+}
+
+// ---------- Qué es Botánica ----------
+function acerca(){
+  card('Qué es Botánica', '<p>Botánica es un prototipo gratuito que busca aportar al bienestar docente disminuyendo la carga administrativa de la jefatura de curso. Lo hace ordenando tareas, calendarizando hitos, ayudando a redactar textos y orientando la aplicación de los reglamentos.</p>' +
+    '<p>Sus contenidos se basan en orientaciones del Ministerio de Educación, de Educarchile y en el Decreto 67 de 2018. Las actividades y textos son sugerencias para adaptar. Ante cualquier duda, priman el reglamento interno y los protocolos de tu establecimiento.</p>' +
+    '<p>Botánica no usa inteligencia artificial para responder, no pide datos de estudiantes y no envía información a ningún servidor. Tus preferencias quedan solo en este dispositivo.</p>' +
+    '<p>Es parte de una investigación del Doctorado en Educación en Consorcio (UBB, UCSC, UCT y UCM).</p>', '');
+  options(['Volver al menú'], function(){ menu(); }, false);
+}
+
+// ---------- Redactar un texto (se arma en el navegador, no se guarda ni se envía) ----------
+var FIRMA = function(v){ return (v.firma ? v.firma : '[Nombre]') + ', profesor/a jefe' + (v.curso ? ' de ' + v.curso : ''); };
+var TEXTOS = {
+  'Comunicación a apoderados': {
+    campos:[['curso','Curso','text','Ej. 8° B'],['tema','Tema','select',['Actividad del curso','Cambio de horario o fecha','Recordatorio','Materiales','Otro']],['fecha','Fecha relevante','text','Ej. viernes 14 de noviembre'],['detalle','Detalle breve','textarea','Qué deben saber o hacer las familias'],['firma','Tu nombre','text','Opcional']],
+    armar:function(v){ return 'Estimadas familias del ' + (v.curso || '[curso]') + ':\nLes escribo para informarles sobre ' + v.tema.toLowerCase() + (v.fecha ? ', el ' + v.fecha : '') + '.\n' + (v.detalle || '[detalle]') + '\nAnte cualquier duda pueden escribirme' + (COLEGIO && COLEGIO.canalOficial ? ' por ' + COLEGIO.canalOficial : ' por el canal oficial del colegio') + '.\nSaludos cordiales,\n' + FIRMA(v); }
+  },
+  'Citación a entrevista': {
+    campos:[['curso','Curso','text','Ej. 8° B'],['motivo','Motivo','select',['Seguimiento académico','Asistencia','Convivencia','Entrega de información','Conversación general']],['fecha','Fecha','text','Ej. martes 11 de noviembre'],['hora','Hora','text','Ej. 15:30'],['lugar','Lugar o modalidad','text','Ej. sala de profesores, o por videollamada'],['firma','Tu nombre','text','Opcional']],
+    armar:function(v){ return 'Estimado/a apoderado/a de [nombre del estudiante]:\nLe invito a una entrevista el ' + (v.fecha || '[fecha]') + ' a las ' + (v.hora || '[hora]') + ', en ' + (v.lugar || '[lugar]') + '. El motivo es ' + v.motivo.toLowerCase() + ', y la idea es conversar juntos sobre cómo apoyar a su hijo o hija.\nSi no puede asistir, le agradeceré avisarme para coordinar otro horario.\nSaludos cordiales,\n' + FIRMA(v); }
+  },
+  'Acta de reunión de apoderados': {
+    campos:[['curso','Curso','text','Ej. 8° B'],['fecha','Fecha','text','Ej. 12 de noviembre'],['asistentes','Número de asistentes','text','Ej. 24'],['temas','Temas tratados','textarea','Uno por línea'],['acuerdos','Acuerdos y responsables','textarea','Uno por línea'],['proxima','Próxima reunión','text','Opcional'],['firma','Tu nombre','text','Opcional']],
+    armar:function(v){ var l = function(t){ return (t || '').split('\n').filter(Boolean).map(function(x){ return '• ' + x.trim(); }).join('\n') || '• [completar]'; };
+      return 'ACTA DE REUNIÓN DE APODERADOS\nCurso. ' + (v.curso || '[curso]') + '\nFecha. ' + (v.fecha || '[fecha]') + '\nAsistentes. ' + (v.asistentes || '[número]') + '\n\nTemas tratados\n' + l(v.temas) + '\n\nAcuerdos\n' + l(v.acuerdos) + (v.proxima ? '\n\nPróxima reunión. ' + v.proxima : '') + '\n\n' + FIRMA(v); }
+  },
+  'Derivación a un equipo de apoyo': {
+    campos:[['destino','Derivar a','select',['Orientación','Convivencia escolar','Dupla psicosocial','Programa de Integración Escolar (PIE)','UTP']],['curso','Curso','text','Ej. 8° B'],['situacion','Tipo de situación','select',['Académica','Asistencia','Socioemocional','Convivencia','Familiar']],['desde','Desde cuándo se observa','text','Ej. inicios de octubre'],['acciones','Acciones ya realizadas','checks',['Conversación con el estudiante','Contacto con el apoderado','Coordinación con profesores de asignatura','Registro en el libro de clases']],['firma','Tu nombre','text','Opcional']],
+    aviso:'No escribas aquí el nombre del estudiante ni detalles de la situación. El texto deja un espacio para completarlo en el documento oficial.',
+    armar:function(v){ var who = COLEGIO && COLEGIO.contactos ? ({'Orientación':COLEGIO.contactos.orientacion,'Convivencia escolar':COLEGIO.contactos.convivencia,'Programa de Integración Escolar (PIE)':COLEGIO.contactos.pie,'UTP':COLEGIO.contactos.utp})[v.destino] : '';
+      return 'Estimado equipo de ' + v.destino + (who ? ' (' + who + ')' : '') + ':\nSolicito su apoyo para el estudiante [nombre del estudiante], del ' + (v.curso || '[curso]') + ', por una situación de tipo ' + v.situacion.toLowerCase() + ' que se observa desde ' + (v.desde || '[fecha]') + '.\nHasta ahora he realizado las siguientes acciones.\n' + ((v.acciones && v.acciones.length) ? v.acciones.map(function(a){ return '• ' + a; }).join('\n') : '• [completar]') + '\nQuedo disponible para coordinar una reunión y entregar mayores antecedentes.\nSaludos cordiales,\n' + FIRMA(v); }
+  },
+  'Correo a los profesores del curso': {
+    campos:[['curso','Curso','text','Ej. 8° B'],['proposito','Propósito','select',['Síntesis del curso al inicio del año','Coordinar evaluaciones para no sobrecargar al curso','Informar una situación general del curso','Agradecer su colaboración']],['detalle','Detalle breve','textarea','Lo que necesitas comunicar, sin nombres de estudiantes'],['firma','Tu nombre','text','Opcional']],
+    armar:function(v){ var intro = {
+        'Síntesis del curso al inicio del año':'Les comparto una síntesis de las características del curso para que la consideren en sus clases.',
+        'Coordinar evaluaciones para no sobrecargar al curso':'Les escribo para coordinar las fechas de evaluación de las próximas semanas, de modo que el curso no tenga varias pruebas el mismo día.',
+        'Informar una situación general del curso':'Les escribo para informarles una situación general del curso que conviene tener presente.',
+        'Agradecer su colaboración':'Quiero agradecerles el apoyo que han dado al curso durante este período.' }[v.proposito];
+      return 'Estimados colegas del ' + (v.curso || '[curso]') + ':\n' + intro + '\n' + (v.detalle || '[detalle]') + '\nQuedo atento/a a sus comentarios.\nSaludos,\n' + FIRMA(v); }
+  },
+  'Registro de entrevista': {
+    campos:[['curso','Curso','text','Ej. 8° B'],['fecha','Fecha','text','Ej. 11 de noviembre'],['con','Entrevista con','select',['Apoderado/a','Estudiante','Apoderado/a y estudiante']],['motivo','Motivo','select',['Seguimiento académico','Asistencia','Convivencia','Situación socioemocional','Otro']],['acuerdos','Acuerdos','textarea','Uno por línea'],['revision','Fecha de revisión','text','Ej. en dos semanas'],['firma','Tu nombre','text','Opcional']],
+    aviso:'Este registro es una base. Los detalles personales se completan en el registro oficial del colegio, no aquí.',
+    armar:function(v){ var l = function(t){ return (t || '').split('\n').filter(Boolean).map(function(x){ return '• ' + x.trim(); }).join('\n') || '• [completar]'; };
+      return 'REGISTRO DE ENTREVISTA\nCurso. ' + (v.curso || '[curso]') + '\nFecha. ' + (v.fecha || '[fecha]') + '\nEntrevista con. ' + v.con + ' de [nombre del estudiante]\nMotivo. ' + v.motivo + '\n\nSíntesis de lo conversado\n[completar en el registro oficial]\n\nAcuerdos\n' + l(v.acuerdos) + '\n\nFecha de revisión. ' + (v.revision || '[fecha]') + '\n\nFirma profesor/a jefe ______________   Firma apoderado/a ______________\n' + FIRMA(v); }
+  },
+  'Respuesta a un apoderado': {
+    campos:[['tono','Situación','select',['Consulta general','Reclamo o molestia','Solicitud de entrevista']],['tema','Tema','text','Ej. una nota, una tarea, una situación en el recreo'],['propuesta','Qué propones','select',['Conversar en una entrevista','Revisar el tema y responder en dos días','Derivar a quien corresponde']],['firma','Tu nombre','text','Opcional']],
+    armar:function(v){ var inicio = v.tono === 'Reclamo o molestia' ? 'Gracias por escribirme y por plantear su inquietud sobre ' : (v.tono === 'Solicitud de entrevista' ? 'Gracias por su mensaje. Con gusto podemos conversar sobre ' : 'Gracias por su consulta sobre ');
+      var paso = { 'Conversar en una entrevista':'Le propongo que lo conversemos en una entrevista el [día] a las [hora], en mi horario de atención.', 'Revisar el tema y responder en dos días':'Voy a revisar la situación y le responderé a más tardar en dos días hábiles.', 'Derivar a quien corresponde':'Para darle una respuesta adecuada, haré llegar su consulta a [cargo], quien se comunicará con usted.' }[v.propuesta];
+      return 'Estimado/a apoderado/a:\n' + inicio + (v.tema || '[tema]') + '.\n' + paso + '\nSaludos cordiales,\n' + FIRMA(v); }
+  },
+  'Reconocimiento a un estudiante': {
+    campos:[['curso','Curso','text','Ej. 8° B'],['motivo','Motivo','select',['Esfuerzo y constancia','Mejora en sus resultados','Buena convivencia y compañerismo','Participación en una actividad','Asistencia y puntualidad']],['detalle','Qué hizo, en una línea','text','Opcional'],['firma','Tu nombre','text','Opcional']],
+    armar:function(v){ return 'Estimada familia:\nQuiero contarles una buena noticia. [Nombre del estudiante] ha destacado en el ' + (v.curso || '[curso]') + ' por ' + v.motivo.toLowerCase() + (v.detalle ? '. ' + v.detalle.charAt(0).toUpperCase() + v.detalle.slice(1).replace(/\.$/, '') : '') + '.\nEs importante reconocerlo y animarlo/a a seguir así.\nSaludos cordiales,\n' + FIRMA(v); }
+  },
+  'Plan de acompañamiento pedagógico': {
+    campos:[['curso','Curso','text','Ej. 8° B'],['situacion','Situación','select',['Estudiante promovido con apoyos','Estudiante que repite curso']],['asignaturas','Asignaturas a reforzar','text','Ej. Matemática y Lenguaje'],['medidas','Medidas acordadas','checks',['Tutoría con un profesor o par','Apoyo del equipo PIE','Seguimiento mensual del profesor jefe','Entrevistas periódicas con la familia','Derivación a orientación']],['revision','Revisiones','text','Ej. al final de cada bimestre'],['firma','Tu nombre','text','Opcional']],
+    aviso:'El Decreto 67 exige que estas medidas sean autorizadas por el padre, madre o apoderado.',
+    armar:function(v){ return 'PLAN DE ACOMPAÑAMIENTO PEDAGÓGICO\nEstudiante. [nombre del estudiante]\nCurso. ' + (v.curso || '[curso]') + '\nSituación. ' + v.situacion + '\nAsignaturas a reforzar. ' + (v.asignaturas || '[completar]') + '\n\nMedidas\n' + ((v.medidas && v.medidas.length) ? v.medidas.map(function(m){ return '• ' + m; }).join('\n') : '• [completar]') + '\n\nRevisiones. ' + (v.revision || '[completar]') + '\n\nAutorización del apoderado/a ______________   Fecha ________\n' + FIRMA(v) + '\n(Decreto 67 de 2018, art. 12)'; }
+  },
+  'Encuesta de inicio para el curso': {
+    campos:[['curso','Curso','text','Ej. 8° B'],['firma','Tu nombre','text','Opcional']],
+    armar:function(v){ return 'ENCUESTA PARA CONOCERNOS (' + (v.curso || '[curso]') + ')\nResponde con sinceridad. Solo la leerá tu profesor/a jefe.\n\n1. ¿Qué es lo que más te gusta del colegio?\n2. ¿Qué asignatura te resulta más fácil y cuál más difícil?\n3. ¿Dónde y cuándo estudias en tu casa?\n4. ¿Con quién puedes conversar cuando tienes un problema?\n5. ¿Qué te gustaría que hiciéramos como curso este año?\n6. ¿Hay algo que quieras que tu profesor/a jefe sepa de ti?\n\n' + FIRMA(v); }
+  },
+  'Reporte para consejo de evaluación': {
+    campos:[['curso','Curso','text','Ej. 8° B'],['periodo','Período','select',['Primer semestre','Segundo semestre','Cierre de año']],['matricula','Número de estudiantes','text','Ej. 35'],['asistencia','Asistencia promedio','text','Ej. 88 %'],['fortalezas','Fortalezas del curso','textarea','Una por línea'],['desafios','Desafíos del curso','textarea','Uno por línea'],['casos','Casos que requieren decisión o apoyo','text','Solo el número, sin nombres'],['propuestas','Propuestas para el próximo período','textarea','Una por línea'],['firma','Tu nombre','text','Opcional']],
+    armar:function(v){ var l = function(t){ return (t || '').split('\n').filter(Boolean).map(function(x){ return '• ' + x.trim(); }).join('\n') || '• [completar]'; };
+      return 'REPORTE DEL CURSO PARA CONSEJO DE EVALUACIÓN\nCurso. ' + (v.curso || '[curso]') + '\nPeríodo. ' + v.periodo + '\nEstudiantes. ' + (v.matricula || '[número]') + '\nAsistencia promedio. ' + (v.asistencia || '[porcentaje]') + '\n\nFortalezas\n' + l(v.fortalezas) + '\n\nDesafíos\n' + l(v.desafios) + '\n\nCasos que requieren decisión o apoyo. ' + (v.casos || '[número]') + ' (detalle en documento interno)\n\nPropuestas\n' + l(v.propuestas) + '\n\n' + FIRMA(v); }
+  }
+};
+function redactar(){
+  bot('¿Qué texto necesitas? Completa unos pocos datos y lo armo. Lo que escribas aquí no se guarda ni se envía.');
+  options(Object.keys(TEXTOS), function(tipo){ formTexto(tipo); });
+}
+function formTexto(tipo){
+  var T = TEXTOS[tipo];
+  var c = card(tipo, '', '');
+  if (T.aviso) { var n = document.createElement('p'); n.className = 'hint'; n.style.cssText = 'color:#7A0E16;font-size:12.5px;margin:0 0 0.4rem'; n.textContent = T.aviso; c.appendChild(n); }
+  var f = document.createElement('form'); f.className = 'frm';
+  T.campos.forEach(function(cp, i){
+    var id = 'f_' + tipo.replace(/\W+/g, '') + '_' + cp[0] + '_' + Date.now() + i;
+    var lab = document.createElement('label'); lab.setAttribute('for', id); lab.textContent = cp[1];
+    var el;
+    if (cp[2] === 'select') { el = document.createElement('select'); cp[3].forEach(function(o){ var op = document.createElement('option'); op.textContent = o; el.appendChild(op); }); }
+    else if (cp[2] === 'textarea') { el = document.createElement('textarea'); el.placeholder = cp[3]; }
+    else if (cp[2] === 'checks') {
+      el = document.createElement('div'); el.className = 'checks';
+      cp[3].forEach(function(o, j){ var l2 = document.createElement('label'); var cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = o; cb.name = cp[0]; cb.id = id + '_' + j; l2.appendChild(cb); l2.appendChild(document.createTextNode(o)); el.appendChild(l2); });
+    }
+    else { el = document.createElement('input'); el.type = 'text'; el.placeholder = cp[3]; }
+    if (cp[2] !== 'checks') { el.id = id; el.name = cp[0]; }
+    if (cp[0] === 'firma' && st.firma) el.value = st.firma;
+    if (cp[0] === 'curso' && st.curso) el.value = st.curso;
+    lab.appendChild(el); f.appendChild(lab);
+  });
+  var go = document.createElement('button'); go.type = 'submit'; go.className = 'btn-small'; go.textContent = 'Generar texto';
+  f.appendChild(go); c.appendChild(f); scrollDown();
+  f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var v = {};
+    T.campos.forEach(function(cp){
+      if (cp[2] === 'checks') v[cp[0]] = Array.prototype.slice.call(f.querySelectorAll('input[name="' + cp[0] + '"]:checked')).map(function(x){ return x.value; });
+      else v[cp[0]] = (f.querySelector('[name="' + cp[0] + '"]').value || '').trim();
+    });
+    if (v.firma) st.firma = v.firma; if (v.curso) st.curso = v.curso; save();
+    copyCard('Tu texto', T.armar(v), '');
+    bot('Revísalo y ajústalo antes de enviarlo. Si el texto lleva un espacio entre corchetes, complétalo fuera de Botánica.', 'b-note');
+    askAhorro(tipo, function(){ options(['Redactar otro texto', 'Mi registro'], function(x){ if (x === 'Redactar otro texto') redactar(); else verRegistro(); }); });
+  });
+}
+
+// ---------- Llevar a mi calendario ----------
+function mesesRestantes(){ var out = []; for (var m = mesIdx; m <= 11; m++) out.push(m); return out; }
+function primerLunes(year, m){ var d = new Date(year, m, 1); while (d.getDay() !== 1) d.setDate(d.getDate() + 1); return d; }
+function ymd(d){ return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); }
+function icsEsc(s){ return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n'); }
+function fold(line){ var out = ''; while (line.length > 72) { out += line.slice(0, 72) + '\r\n '; line = line.slice(72); } return out + line; }
+function exportarCalendario(){
+  var year = new Date().getFullYear();
+  var meses = mesesRestantes();
+  bot('Preparé un recordatorio para el primer lunes de cada mes, desde ' + MESES[meses[0]] + ' hasta diciembre, con los hitos de la jefatura de ese mes.');
+  var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Botanica//Jefatura//ES', 'CALSCALE:GREGORIAN'];
+  meses.forEach(function(m){
+    var d = primerLunes(year, m), d2 = new Date(d); d2.setDate(d.getDate() + 1);
+    var desc = hitosDelMes(m).map(function(h){ return '- ' + h; }).join('\n');
+    lines.push('BEGIN:VEVENT', 'UID:botanica-' + year + '-' + (m + 1) + '@jefatura', 'DTSTAMP:' + ymd(new Date()) + 'T000000Z',
+      'DTSTART;VALUE=DATE:' + ymd(d), 'DTEND;VALUE=DATE:' + ymd(d2),
+      fold('SUMMARY:' + icsEsc('Jefatura de curso, hitos de ' + MESES[m])), fold('DESCRIPTION:' + icsEsc(desc)),
+      'BEGIN:VALARM', 'TRIGGER:-PT15H', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc('Hitos de jefatura'), 'END:VALARM', 'END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  var ics = lines.join('\r\n');
+  var c = card('Tus recordatorios', '<p>Puedes descargar todos los meses en un archivo para tu calendario, o agregar solo el mes actual a Google Calendar.</p>', '');
+  var row = document.createElement('div'); row.className = 'row-btns';
+  var b1 = document.createElement('button'); b1.type = 'button'; b1.className = 'btn-small'; b1.textContent = 'Descargar archivo de calendario';
+  b1.addEventListener('click', function(){
+    try {
+      var url = URL.createObjectURL(new Blob([ics], { type:'text/calendar;charset=utf-8' }));
+      var a = document.createElement('a'); a.href = url; a.download = 'jefatura-botanica.ics'; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+      b1.textContent = 'Archivo descargado';
+    } catch(e) { b1.textContent = 'No se pudo descargar'; }
+  });
+  var d0 = primerLunes(year, meses[0]), d1 = new Date(d0); d1.setDate(d0.getDate() + 1);
+  var g = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Jefatura de curso, hitos de ' + MESES[meses[0]]) +
+    '&dates=' + ymd(d0) + '/' + ymd(d1) + '&details=' + encodeURIComponent(hitosDelMes(meses[0]).map(function(h){ return '- ' + h; }).join('\n'));
+  var b2 = document.createElement('a'); b2.className = 'btn-outline'; b2.href = g; b2.target = '_blank'; b2.rel = 'noopener'; b2.textContent = 'Agregar ' + MESES[meses[0]] + ' a Google Calendar'; b2.style.cssText = 'text-decoration:none;border-radius:10px;font-weight:600;display:inline-block';
+  row.appendChild(b1); row.appendChild(b2);
+  c.insertBefore(row, c.querySelector('.src'));
+  bot('El archivo se abre con el calendario de tu celular, Outlook o Google Calendar. Cada recordatorio avisa el día anterior.', 'b-note');
+  options(['Ver mi mes', 'Redactar un texto'], function(v){ if (v === 'Ver mi mes') verMes(); else redactar(); });
+}
+
+if (COLEGIO && COLEGIO.nombre) { var tag = document.querySelector('.brand-tag'); if (tag) tag.textContent = 'Jefatura de curso, ' + COLEGIO.nombre; }
 start();
 })();
 </script>
