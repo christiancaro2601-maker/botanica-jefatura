@@ -5,24 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Botánica Jefatura</title>
 <meta name="description" content="Apoyo gratuito para simplificar el trabajo de jefatura de curso." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --green:#3B6D11; --green-dark:#27500A; --green-tint:#EAF3DE;
+    --green:#3B3A34; --green-dark:#2A2925; --green-tint:#EEEAF4;
+    --copihue:#B5473A; --lavanda:#7B6AA8; --ocre:#C8902E; --tallo:#7A8668;
     --red:#CE1323; --red-dark:#7A0E16; --red-tint:#FBEAEA;
     --amber-tint:#FBF3DC; --amber-dark:#6B4E00;
-    --ink:#222222; --muted:#5F6B55; --card:#F4F6F2; --line:#DFE4DA; --white:#FFFFFF;
+    --ink:#2A2925; --muted:#64625A; --card:#F4F1EA; --line:#E6E2D8; --white:#FFFFFF; --ground:#F8F6F1;
   }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--white); color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; }
+  body { margin:0; background:var(--ground); color:var(--ink);
+    font-family:Figtree,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; }
+  .serif { font-family:Fraunces,Georgia,serif; }
   .page { max-width:1100px; margin:0 auto; padding:1.5rem 16px 2.5rem; }
 
   .brand { display:flex; align-items:center; gap:10px; margin:0 0 0.3rem; }
-  .brand-mark { width:34px; height:34px; border-radius:50%; background:var(--green-tint); color:var(--green);
+  .brand-mark { width:40px; height:40px; border-radius:50%; background:#FFFFFF; border:1px solid var(--line);
     display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
-  .brand-word { font-size:26px; letter-spacing:-0.4px; }
-  .brand-word b { font-weight:600; color:var(--green); }
-  .brand-tag { font-size:13px; font-weight:600; color:var(--green-dark); background:var(--green-tint); border-radius:999px; padding:0.15rem 0.65rem; margin-left:4px; }
+  .brand-word { font-family:Fraunces,Georgia,serif; font-size:30px; font-weight:600; letter-spacing:-0.4px; }
+  .brand-word b { font-weight:600; color:var(--copihue); }
+  .brand-tag { font-size:12.5px; font-weight:600; color:var(--muted); background:#FFFFFF; border:1px solid var(--line); border-radius:999px; padding:0.2rem 0.7rem; margin-left:6px; }
   header .sub { font-size:13.5px; color:var(--muted); margin:0 0 1.1rem; }
 
   .layout { display:flex; gap:1.2rem; align-items:flex-start; }
@@ -32,13 +36,13 @@
 
   #chat { display:flex; flex-direction:column; gap:10px; min-height:360px; max-height:64vh;
     overflow-y:auto; padding:0.2rem 0.2rem 0.2rem 0; margin-bottom:1rem; }
-  .b-bot { background:var(--card); border-radius:14px; border-bottom-left-radius:4px;
+  .b-bot { background:#FFFFFF; border:1px solid var(--line); border-radius:16px; border-bottom-left-radius:4px;
     padding:0.7rem 0.95rem; max-width:88%; font-size:14.5px; line-height:1.55; white-space:pre-line; }
-  .b-user { background:var(--green); color:#fff; border-radius:14px; border-bottom-right-radius:4px;
+  .b-user { background:var(--green-tint); color:var(--ink); border-radius:16px; border-bottom-right-radius:4px;
     padding:0.6rem 0.95rem; max-width:88%; align-self:flex-end; font-size:14.5px; line-height:1.5; }
-  .b-card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:0.85rem 1rem;
+  .b-card { background:#fff; border:1px solid var(--line); border-radius:18px; padding:0.85rem 1rem;
     max-width:96%; font-size:13.8px; line-height:1.55; }
-  .b-card h3 { font-size:14.5px; margin:0 0 0.5rem; color:var(--green-dark); }
+  .b-card h3 { font-family:Fraunces,Georgia,serif; font-size:17px; font-weight:600; margin:0 0 0.5rem; color:var(--ink); }
   .b-card ol, .b-card ul { margin:0.2rem 0 0.3rem; padding-left:1.2rem; }
   .b-card li { margin-bottom:0.3rem; }
   .b-card pre { white-space:pre-wrap; font-family:inherit; margin:0.3rem 0 0.6rem; background:var(--card);
@@ -53,18 +57,18 @@
   .tbl td:first-child { color:var(--muted); white-space:nowrap; width:1%; font-variant-numeric:tabular-nums; }
 
   button { cursor:pointer; font-family:inherit; font-weight:600; border:none; border-radius:10px; }
-  .btn-ghost { background:var(--card); color:var(--ink); border:1px solid var(--line);
-    padding:0.5rem 0.9rem; font-size:13.5px; text-align:left; }
+  .btn-ghost { background:#FFFFFF; color:var(--ink); border:1px solid var(--line); border-radius:999px;
+    padding:0.55rem 1rem; font-size:13.5px; text-align:left; }
   .btn-ghost:active { background:var(--green-tint); }
   .btn-ghost[aria-pressed="true"] { background:var(--green-tint); border-color:var(--green); color:var(--green-dark); }
-  .btn-small { background:var(--green); color:#fff; padding:0.4rem 0.85rem; font-size:13px; }
+  .btn-small { background:var(--green); color:#fff; padding:0.5rem 1rem; font-size:13px; border-radius:999px; }
   .btn-small:disabled { opacity:0.5; cursor:default; }
   .btn-home { background:none; color:var(--green-dark); text-decoration:underline; padding:0.5rem 0.2rem; font-size:13px; }
   button:focus-visible { outline:2px solid var(--green-dark); outline-offset:2px; }
   .opt-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:0.6rem; }
 
-  .panel { background:var(--card); border-radius:12px; padding:0.9rem 1rem; margin-bottom:0.8rem; }
-  .panel h2 { font-size:12.5px; color:var(--green-dark); margin:0 0 0.6rem; font-weight:700; }
+  .panel { background:#FFFFFF; border:1px solid var(--line); border-radius:18px; padding:0.9rem 1rem; margin-bottom:0.8rem; }
+  .panel h2 { font-family:Fraunces,Georgia,serif; font-size:16px; color:var(--ink); margin:0 0 0.6rem; font-weight:600; }
   .panel ul { margin:0; padding-left:1.1rem; font-size:12.8px; line-height:1.5; }
   .panel li { margin-bottom:0.25rem; }
   .empty { font-size:12.5px; color:var(--muted); line-height:1.5; margin:0; }
@@ -93,15 +97,15 @@
   .vbars { display:flex; align-items:flex-end; gap:4px; height:92px; border-bottom:1px solid #C9D1C2; }
   .vb { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%; cursor:default; }
   .vb .v { font-size:10.5px; font-weight:600; color:var(--ink); margin-bottom:2px; font-variant-numeric:tabular-nums; white-space:nowrap; }
-  .vb .bar { width:100%; max-width:22px; background:var(--green); border-radius:4px 4px 0 0; min-height:0; }
-  .vb .bar.cur { background:var(--green-dark); }
+  .vb .bar { width:100%; max-width:22px; background:var(--lavanda); border-radius:4px 4px 0 0; min-height:0; }
+  .vb .bar.cur { background:var(--copihue); }
   .vb:hover .bar { opacity:0.8; }
   .xlab { display:flex; gap:4px; margin-top:3px; }
   .xlab span { flex:1; min-width:0; text-align:center; font-size:10px; color:var(--muted); }
   .hrow { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 22px; gap:6px; align-items:center; font-size:11.8px; margin-bottom:5px; }
   .hrow .hl { color:var(--ink); line-height:1.3; }
   .hrow .ht { height:8px; background:#E2E7DD; border-radius:4px; overflow:hidden; }
-  .hrow .hf { display:block; height:100%; background:var(--green); border-radius:0 4px 4px 0; }
+  .hrow .hf { display:block; height:100%; background:var(--ocre); border-radius:0 4px 4px 0; }
   .hrow .hv { text-align:right; font-weight:600; font-variant-numeric:tabular-nums; }
   .b-card .chart .vbars { height:120px; }
   .reg-form { display:flex; gap:6px; width:100%; margin:0 0 0.4rem; }
@@ -109,6 +113,17 @@
   .reg-sug { display:flex; flex-wrap:wrap; gap:6px; width:100%; }
   .reg-snip { font-size:13.5px; line-height:1.55; margin:0 0 0.5rem; }
   .reg-snip mark { background:var(--green-tint); color:var(--green-dark); padding:0 2px; border-radius:3px; }
+  .home { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; max-width:100%; }
+  @media (max-width: 640px){ .home { grid-template-columns:1fr; } }
+  .tile { background:#FFFFFF; border:1px solid var(--line); border-radius:22px; padding:14px 16px 16px; text-align:left; display:flex; flex-direction:column; gap:6px; color:var(--ink); font-weight:400; }
+  .tile:hover { border-color:#CFC8B8; }
+  .tile svg { width:100%; height:110px; }
+  .tile .kind { font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; }
+  .tile .tt { font-family:Fraunces,Georgia,serif; font-size:20px; font-weight:600; line-height:1.15; }
+  .tile .td { font-size:13px; line-height:1.45; color:var(--muted); }
+  .hero { font-family:Fraunces,Georgia,serif; font-size:24px; font-weight:400; line-height:1.2; margin:0.2rem 0 0.1rem; }
+  .garden svg { width:100%; height:auto; display:block; }
+  .b-card .garden svg { max-width:460px; }
   footer { margin-top:1.4rem; font-size:11.5px; color:var(--muted); text-align:center; line-height:1.6; }
 </style>
 </head>
@@ -116,10 +131,10 @@
 <div class="page">
   <header>
     <div class="brand">
-      <span class="brand-mark"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V11"/><path d="M12 14c0-3.3 2.7-6 6-6 0 3.3-2.7 6-6 6z"/><path d="M12 12C12 8.7 9.3 6 6 6c0 3.3 2.7 6 6 6z"/></svg></span>
+      <span class="brand-mark" id="brand-mark"></span>
       <span class="brand-word"><b>bot</b>ánica</span><span class="brand-tag">Jefatura de curso</span>
     </div>
-    <p class="sub">Menos tiempo en lo administrativo, más tiempo para tu curso. Calendario, reuniones de apoderados, consejo de curso, seguimiento y prioridades del mes.</p>
+    <p class="sub">Menos trámite, más tiempo para florecer. Ordena tu jefatura y tu asignatura con las reglas de tu liceo.</p>
   </header>
 
   <div class="layout">
@@ -559,21 +574,25 @@ function askNivel(){
   }, false);
 }
 function menu(){
-  bot('¿Qué necesitas hoy?');
-  options(['Ver mi mes', 'Llevar a mi calendario', 'Redactar un texto', 'Preparar reunión de apoderados', 'Planificar consejo de curso', 'Seguimiento o derivación', 'Consultar el reglamento', 'Mi asignatura', 'Priorizar mis tareas', 'Mi registro', 'Qué es Botánica', 'Cambiar nivel'], function(v){
+  var h = document.createElement('p'); h.className = 'hero'; h.textContent = '¿Qué cultivamos hoy?'; node(h);
+  inicio();
+  options(['Mi registro', 'Qué es Botánica', 'Cambiar nivel'], function(v){
+    if (v === 'Mi registro') verRegistro();
+    else if (v === 'Qué es Botánica') acerca();
+    else { st.nivel = ''; save(); renderSide(); askNivel(); }
+  }, false);
+}
+function menuJefatura(){
+  bot('¿Qué necesitas de tu jefatura?');
+  options(['Ver mi mes', 'Llevar a mi calendario', 'Redactar un texto', 'Preparar reunión de apoderados', 'Planificar consejo de curso', 'Seguimiento o derivación', 'Priorizar mis tareas'], function(v){
     if (v === 'Ver mi mes') verMes();
     else if (v === 'Llevar a mi calendario') exportarCalendario();
     else if (v === 'Redactar un texto') redactar();
     else if (v === 'Preparar reunión de apoderados') reunion();
     else if (v === 'Planificar consejo de curso') consejo();
     else if (v === 'Seguimiento o derivación') seguimiento();
-    else if (v === 'Priorizar mis tareas') priorizar();
-    else if (v === 'Qué es Botánica') acerca();
-    else if (v === 'Mi registro') verRegistro();
-    else if (v === 'Consultar el reglamento') consultar();
-    else if (v === 'Mi asignatura') miAsignatura();
-    else { st.nivel = ''; save(); renderSide(); askNivel(); }
-  }, false);
+    else priorizar();
+  });
 }
 
 // 1. Calendario
@@ -764,9 +783,9 @@ function datosRegistro(){
 function registroHTML(){
   if (!st.nivel) return '<p class="empty">Aparece cuando elijas tu nivel.</p>';
   var d = datosRegistro(), labels = d.meses.map(function(m){ return MES_CORTO[m]; }), cur = d.meses.indexOf(mesIdx);
-  var h = '<div class="chart"><p class="ct">Tiempo ahorrado por mes</p>';
-  h += d.total ? '<p class="cs">' + fmtMin(d.total) + ' en total, según lo que tú reportaste.</p>' + vChart(d.ahorro, labels, cur, fmtMin, function(i, v){ return MESES[d.meses[i]] + ', ' + fmtMin(v) + ' ahorrados'; })
-               : '<p class="cs">Se completa cuando respondas cuánto tiempo te ahorró un texto o una reunión.</p>';
+  var h = '<div class="chart"><p class="ct">Mi jardín, tiempo recuperado por mes</p>';
+  h += d.total ? '<p class="cs">' + fmtMin(d.total) + ' en total, según lo que tú reportaste.</p>' + jardinSVG(d.ahorro, labels, cur)
+               : '<p class="cs">Tu jardín florece cuando respondes cuánto tiempo te ahorró un texto o una reunión.</p>';
   h += '</div><div class="chart"><p class="ct">Mis tareas más pesadas</p>';
   h += d.top.length ? '<p class="cs">Veces que las marcaste en "Priorizar mis tareas".</p>' + hChart(d.top) : '<p class="cs">Se completa cuando uses "Priorizar mis tareas".</p>';
   h += '</div><div class="chart"><p class="ct">Carga de la jefatura en el año</p><p class="cs">Número de hitos de cada mes. El mes actual va más oscuro.</p>' +
@@ -1260,6 +1279,66 @@ function verOA(){
   });
 }
 
+// ---------- Flora generativa (dibujo por reglas, sin IA) ----------
+var FLORA = { copihue:'#B5473A', lavanda:'#7B6AA8', ocre:'#C8902E', tallo:'#7A8668' };
+function floraRng(seed){ var a = seed >>> 0; return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function fx(n){ return n.toFixed(1); }
+function fPath(d, stroke, w, fill){ return '<path d="' + d + '" stroke="' + stroke + '" stroke-width="' + w + '" fill="' + (fill || 'none') + '" stroke-linecap="round"/>'; }
+function fStem(x, base, top, r){ return fPath('M' + x + ' ' + base + ' Q' + fx(x + (r() - 0.5) * 18) + ' ' + fx((base + top) / 2) + ' ' + fx(x + (r() - 0.5) * 6) + ' ' + fx(top), FLORA.tallo, 1.4); }
+function fLeaf(x, y, ang, size, stroke, fill){
+  var tx = x + Math.cos(ang) * size, ty = y + Math.sin(ang) * size, nx = Math.cos(ang + Math.PI / 2) * size * 0.45, ny = Math.sin(ang + Math.PI / 2) * size * 0.45, mx = (x + tx) / 2, my = (y + ty) / 2;
+  return fPath('M' + fx(x) + ' ' + fx(y) + ' Q' + fx(mx + nx) + ' ' + fx(my + ny) + ' ' + fx(tx) + ' ' + fx(ty) + ' Q' + fx(mx - nx) + ' ' + fx(my - ny) + ' ' + fx(x) + ' ' + fx(y) + 'Z', stroke || FLORA.tallo, 1, fill || 'rgba(122,134,104,0.18)');
+}
+function fDaisy(cx, cy, rad, open, color, r){
+  var out = '', n = 11 + Math.floor(r() * 4), len = rad * (0.35 + 0.65 * open);
+  for (var i = 0; i < n; i++) out += fLeaf(cx, cy, (i / n) * Math.PI * 2 + r() * 0.08, len, color, 'rgba(255,255,255,0.95)');
+  return out + '<circle cx="' + fx(cx) + '" cy="' + fx(cy) + '" r="' + fx(Math.max(2, rad * 0.22)) + '" fill="' + color + '"/>';
+}
+function fBell(x, y, s, color){
+  return fPath('M' + fx(x) + ' ' + fx(y) + ' C' + fx(x - s * 0.55) + ' ' + fx(y + s * 0.3) + ' ' + fx(x - s * 0.5) + ' ' + fx(y + s * 0.95) + ' ' + fx(x - s * 0.28) + ' ' + fx(y + s * 1.15) + ' L' + fx(x + s * 0.28) + ' ' + fx(y + s * 1.15) + ' C' + fx(x + s * 0.5) + ' ' + fx(y + s * 0.95) + ' ' + fx(x + s * 0.55) + ' ' + fx(y + s * 0.3) + ' ' + fx(x) + ' ' + fx(y) + 'Z', color, 1.1, color) +
+    fPath('M' + fx(x) + ' ' + fx(y + s * 0.15) + ' L' + fx(x) + ' ' + fx(y + s * 1.12), 'rgba(255,255,255,0.55)', 0.8);
+}
+function floraSVG(kind, seed){
+  var r = floraRng(seed || 7), body = '';
+  if (kind === 'copihue') {
+    body = fPath('M20 40 C70 10 120 70 170 30 S210 40 214 60', FLORA.tallo, 1.5);
+    [[60, 32, 22], [118, 46, 26], [176, 34, 20]].forEach(function(b){ body += fPath('M' + b[0] + ' ' + b[1] + ' l0 10', FLORA.tallo, 1) + fBell(b[0], b[1] + 10, b[2] * (0.9 + r() * 0.2), FLORA.copihue) + fLeaf(b[0] + 6, b[1] - 2, -0.6 + r() * 0.3, 16); });
+  } else if (kind === 'lavanda') {
+    [80, 110, 140].forEach(function(x, k){
+      var top = 22 + k % 2 * 10, base = 146; body += fStem(x, base, top, r);
+      for (var i = 0; i < 9; i++) { var y = top + i * 7, side = i % 2 ? 1 : -1; body += '<ellipse cx="' + fx(x + side * 3.4) + '" cy="' + fx(y) + '" rx="3.4" ry="4.6" fill="' + FLORA.lavanda + '"/>'; }
+      body += fLeaf(x, base - 30, -Math.PI / 2 - 0.5, 22);
+    });
+  } else {
+    body = fStem(110, 148, 56, r) + fLeaf(110, 118, -Math.PI / 2 - 0.9, 26) + fLeaf(110, 100, -Math.PI / 2 + 0.9, 22) + fDaisy(110, 52, 40, 1, FLORA.ocre, r);
+  }
+  return '<svg viewBox="0 0 220 150" role="img" aria-label="' + kind + ' dibujado por reglas de crecimiento">' + body + '</svg>';
+}
+function floraMark(){ var r = floraRng(3); return '<svg viewBox="0 0 40 40" width="30" height="30" aria-hidden="true">' + fDaisy(20, 20, 15, 1, FLORA.copihue, r) + '</svg>'; }
+function jardinSVG(vals, labels, curIdx){
+  var max = Math.max.apply(null, vals.concat([60])), cols = [FLORA.copihue, FLORA.lavanda, FLORA.ocre], r = floraRng(11), w = vals.length * 30 + 10, body = '';
+  vals.forEach(function(v, i){
+    var x = 20 + i * 30, open = v / max, top = 78 - (8 + open * 38);
+    body += '<g><title>' + esc(labels[i] + ', ' + fmtMin(v)) + '</title>' + fStem(x, 80, top, r);
+    if (v > 0) body += fLeaf(x, 80 - (80 - top) * 0.45, -Math.PI / 2 + (i % 2 ? 0.9 : -0.9), 7) + fDaisy(x, top, 4 + open * 7, Math.max(0.15, open), cols[i % 3], r);
+    else body += '<circle cx="' + x + '" cy="' + fx(top) + '" r="2" fill="' + FLORA.tallo + '"/>';
+    body += '<text x="' + x + '" y="94" text-anchor="middle" font-size="8.5" fill="' + (i === curIdx ? '#2A2925' : '#64625A') + '" font-weight="' + (i === curIdx ? 700 : 400) + '">' + labels[i] + '</text></g>';
+  });
+  return '<div class="garden"><svg viewBox="0 22 ' + w + ' 78" role="img" aria-label="' + esc(vals.map(function(v, i){ return labels[i] + ' ' + fmtMin(v); }).join(', ')) + '">' + body + '</svg></div>';
+}
+function inicio(){
+  var c = document.createElement('div'); c.className = 'home';
+  [['copihue', 'Copihue', 'Jefatura de curso', 'Lo que toca este mes, textos listos, reuniones, consejo de curso y seguimiento.', FLORA.copihue, function(){ menuJefatura(); }],
+   ['lavanda', 'Lavanda', 'Consultar el reglamento', 'Pregunta con tus palabras. Responde con el texto del reglamento y su página.', FLORA.lavanda, function(){ consultar(); }],
+   ['margarita', 'Margarita', 'Mi asignatura', 'Notas, evaluaciones, pautas y planificación con los objetivos oficiales.', FLORA.ocre, function(){ miAsignatura(); }]].forEach(function(t){
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'tile';
+    b.innerHTML = floraSVG(t[0], 7) + '<span class="kind" style="color:' + t[4] + '">' + t[1] + '</span><span class="tt">' + t[2] + '</span><span class="td">' + t[3] + '</span>';
+    b.addEventListener('click', function(){ optionsEl.innerHTML = ''; user(t[2]); t[5](); });
+    c.appendChild(b);
+  });
+  return node(c);
+}
+
 // ---------- Qué es Botánica ----------
 function acerca(){
   card('Qué es Botánica', '<p>Botánica es un prototipo gratuito que busca aportar al bienestar docente disminuyendo la carga administrativa de la jefatura de curso. Lo hace ordenando tareas, calendarizando hitos, ayudando a redactar textos y orientando la aplicación de los reglamentos.</p>' +
@@ -1414,7 +1493,8 @@ function exportarCalendario(){
   options(['Ver mi mes', 'Redactar un texto'], function(v){ if (v === 'Ver mi mes') verMes(); else redactar(); });
 }
 
-if (COLEGIO && COLEGIO.nombre) { var tag = document.querySelector('.brand-tag'); if (tag) tag.textContent = 'Jefatura de curso, ' + COLEGIO.nombre; }
+if (COLEGIO && COLEGIO.nombre) { var tag = document.querySelector('.brand-tag'); if (tag) tag.textContent = COLEGIO.nombre; }
+try { document.getElementById('brand-mark').innerHTML = floraMark(); } catch(e){}
 start();
 })();
 </script>
