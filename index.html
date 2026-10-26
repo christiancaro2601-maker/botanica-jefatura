@@ -113,7 +113,7 @@
   .reg-sug { display:flex; flex-wrap:wrap; gap:6px; width:100%; }
   .reg-snip { font-size:13.5px; line-height:1.55; margin:0 0 0.5rem; }
   .reg-snip mark { background:var(--green-tint); color:var(--green-dark); padding:0 2px; border-radius:3px; }
-  .home { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; max-width:100%; }
+  .home { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; max-width:100%; }
   @media (max-width: 640px){ .home { grid-template-columns:1fr; } }
   .tile { background:#FFFFFF; border:1px solid var(--line); border-radius:22px; padding:14px 16px 16px; text-align:left; display:flex; flex-direction:column; gap:6px; color:var(--ink); font-weight:400; }
   .tile:hover { border-color:#CFC8B8; }
@@ -167,6 +167,7 @@
           <li>Mineduc (2023). Orientaciones didácticas, Orientación.</li>
           <li>Educarchile. Orientaciones para el desempeño del profesor jefe, 1° a 6° básico.</li>
           <li>Decreto 67 de 2018, Ministerio de Educación, sobre evaluación, calificación y promoción.</li>
+          <li>Docentemás (2026). Portafolio 2026. Ayuda Mineduc, Sistema de Reconocimiento del Desarrollo Profesional Docente.</li>
         </ul>
       </div>
     </aside>
@@ -1279,8 +1280,194 @@ function verOA(){
   });
 }
 
+// ---------- Evaluación docente (organiza y orienta, no redacta el portafolio) ----------
+var ED = { anio:2026, inicioTxt:'8 de julio', cierre:new Date(2026, 10, 10, 23, 59), cierreTxt:'10 de noviembre de 2026' };
+var ED_SRC = 'Docentemás (2026), Comienza la elaboración del Portafolio 2026; Ayuda Mineduc, Portafolio, preguntas frecuentes.';
+var ED_ECEP_SRC = 'Ayuda Mineduc, Sistema de Reconocimiento del Desarrollo Profesional Docente; Ley 20.903, art. 19 M.';
+var ED_PASOS = ['Leí la parte del manual que corresponde a mi agrupación', 'Revisé la rúbrica oficial de esta tarea', 'Reuní las evidencias que pide', 'Tengo un borrador', 'Revisé el borrador con las preguntas guía', 'La cargué en DocenteMás'];
+var ED_TAREAS = [
+  { id:'t1', mod:'Módulo 1', nom:'Tarea 1. Planificación',
+    que:'Describir actividades que desarrollaste con tus estudiantes.',
+    evalua:'Cómo planificas la enseñanza y cómo usas esa información para retroalimentar a tus estudiantes y tu propia práctica.',
+    preguntas:['¿Los propósitos de las actividades se vinculan con los OA del nivel?', '¿Las actividades muestran una secuencia que avanza hacia ese propósito?', '¿Se nota cómo consideraste las características de tus estudiantes?', '¿Explicas cómo usaste lo que observaste para retroalimentar a tus estudiantes?', '¿Explicas qué ajustaste en tu práctica a partir de esa información?'] },
+  { id:'t2', mod:'Módulo 1', nom:'Tarea 2. Evaluación',
+    que:'Presentar una evaluación que aplicaste y responder preguntas sobre ella.',
+    evalua:'Cómo evalúas el aprendizaje de tus estudiantes.',
+    preguntas:['¿La evaluación mide los objetivos que declaras evaluar?', '¿Sus preguntas o tareas son coherentes con lo trabajado en clases?', '¿Tiene pauta o criterios de corrección claros?', '¿Analizas los resultados y distingues qué lograron y qué no?', '¿Describes cómo retroalimentaste a partir de esos resultados?'] },
+  { id:'t3', mod:'Módulo 1', nom:'Tarea 3. Reflexión',
+    que:'Responder preguntas sobre tu quehacer docente.',
+    evalua:'Cómo reflexionas sobre tu práctica.',
+    preguntas:['¿Tus respuestas se apoyan en situaciones concretas de tu aula?', '¿Analizas causas posibles y no solo describes lo ocurrido?', '¿Reconoces algo por mejorar y propones acciones realistas?', '¿Relacionas tu reflexión con el aprendizaje de tus estudiantes?'] },
+  { id:'t4', mod:'Módulo 2', nom:'Tarea 4. Clase grabada',
+    que:'Grabación de una clase y una ficha descriptiva. La fecha no la agendas tú, la acuerdan el coordinador de grabaciones del liceo y DocenteMás.',
+    evalua:'La estructura de la clase, la promoción de la participación, el uso de explicaciones y preguntas, y la retroalimentación al estudiantado.',
+    pasos:['Confirmé con la dirección la fecha de grabación', 'Revisé la rúbrica oficial de esta tarea', 'Planifiqué la clase que se grabará', 'Se realizó la grabación', 'Completé la ficha descriptiva', 'La cargué en DocenteMás'],
+    preguntas:['¿La clase planificada tiene inicio, desarrollo y cierre reconocibles?', '¿Comunicas el objetivo y lo retomas al cierre?', '¿Hay momentos para que participen distintos estudiantes y no siempre los mismos?', '¿Tus explicaciones usan ejemplos y tus preguntas piden razonar y no solo recordar?', '¿Tienes previsto cómo retroalimentar durante la clase de forma específica?'] },
+  { id:'t5', mod:'Módulo 3', nom:'Tarea 5. Trabajo colaborativo',
+    que:'Describir una experiencia de trabajo colaborativo orientada al aprendizaje y reflexionar sobre ella. La sección A puede elaborarse en conjunto, las secciones B y C son individuales. Se complementa con un reporte de tu director o directora.',
+    evalua:'Tu participación en experiencias colaborativas, la pertinencia de tu desarrollo profesional y tu reflexión sobre ellas.',
+    preguntas:['¿La experiencia tuvo un propósito claro ligado al aprendizaje de los estudiantes?', '¿Queda claro cuál fue tu aporte dentro del equipo?', '¿Describes qué cambió en tu práctica o en tus estudiantes a partir de la experiencia?', '¿Tu reflexión individual va más allá de lo escrito en conjunto?'] }
+];
+function edPasos(t){ return t.pasos || ED_PASOS; }
+function edEstado(){ st.ed = st.ed || {}; ED_TAREAS.forEach(function(t){ if (!st.ed[t.id]) st.ed[t.id] = edPasos(t).map(function(){ return false; }); }); return st.ed; }
+function edAvance(t){ var e = edEstado()[t.id]; return e.filter(Boolean).length / e.length; }
+function edDias(){ var hoy = new Date(); hoy.setHours(0, 0, 0, 0); var c = new Date(ED.cierre); c.setHours(0, 0, 0, 0); return Math.round((c - hoy) / 86400000); }
+
+function evalDocente(){
+  bot('Te acompaño a organizar tu proceso de evaluación docente. El portafolio tiene que mostrar tu práctica real, así que no redacto respuestas por ti. Te ayudo con los plazos, el avance, la revisión con preguntas guía y el repaso para la prueba.');
+  edMenu();
+}
+function edMenu(){
+  options(['Plazos 2026', 'Mi avance en el portafolio', 'Revisar un borrador', 'Preparar la prueba de conocimientos', 'Cuidar mi tiempo en el proceso'], function(v){
+    if (v === 'Plazos 2026') edPlazos();
+    else if (v === 'Mi avance en el portafolio') edAvanceVer();
+    else if (v === 'Revisar un borrador') edRevisar();
+    else if (v === 'Preparar la prueba de conocimientos') edEcep();
+    else edCuidar();
+  });
+}
+function edVolver(extra){ options(['Otra opción de evaluación docente'].concat(extra || []), function(v){ if (v === 'Otra opción de evaluación docente') edMenu(); else if (v === 'Mi avance en el portafolio') edAvanceVer(); else if (v === 'Revisar un borrador') edRevisar(); }); }
+
+// 1. Plazos
+function edPlazos(){
+  var d = edDias(), pend = ED_TAREAS.filter(function(t){ return edAvance(t) < 1; });
+  var h = '<table class="tbl">' +
+    '<tr><td>Portafolio</td><td>La plataforma DocenteMás está abierta del ' + ED.inicioTxt + ' al ' + ED.cierreTxt + '. Se entra con ClaveÚnica.</td></tr>' +
+    '<tr><td>Clase grabada</td><td>La fecha la coordinan el coordinador de grabaciones del liceo y el coordinador territorial de DocenteMás. Pregunta tu fecha en dirección.</td></tr>' +
+    '<tr><td>Prueba de conocimientos</td><td>La inscripción es en evaluacionconocimientos.cl, normalmente entre septiembre y octubre, y no se aceptan inscripciones tardías.</td></tr>' +
+    '<tr><td>Suspensión o eximición</td><td>Puede solicitarse durante todo el período de elaboración. La resuelve el sostenedor o el encargado de evaluación.</td></tr></table>';
+  card('Evaluación docente ' + ED.anio, h, ED_SRC + ' Decreto 339, arts. 34 y 35.');
+  if (d < 0) bot('El período de elaboración del portafolio ' + ED.anio + ' ya cerró. Las fechas del próximo proceso se publican en docentemas.cl.', 'b-note');
+  else if (!pend.length) bot('Te quedan ' + d + (d === 1 ? ' día' : ' días') + ' de plazo y marcaste todas las tareas como cargadas. Buen trabajo.', 'b-note');
+  else {
+    var util = Math.max(1, d - 3), ritmo = Math.max(1, Math.floor(util / pend.length));
+    bot('Te quedan ' + d + (d === 1 ? ' día' : ' días') + ' para el cierre y ' + pend.length + (pend.length === 1 ? ' tarea sin terminar' : ' tareas sin terminar') + '. Un ritmo posible es avanzar una tarea cada ' + ritmo + (ritmo === 1 ? ' día' : ' días') + ' y dejar los últimos tres días para revisar y cargar.', 'b-note');
+  }
+  edCalendario(d);
+  bot('Los plazos son los publicados por DocenteMás. Si tu liceo fija fechas internas antes del cierre, guíate por esas.', 'b-note');
+  edVolver(['Mi avance en el portafolio']);
+}
+function edCalendario(d){
+  if (d < 1) return;
+  var evs = [[7, 'Portafolio, queda una semana para el cierre'], [3, 'Portafolio, revisar y cargar todo'], [1, 'Portafolio, cierre mañana']].filter(function(x){ return d > x[0]; });
+  if (!evs.length) return;
+  var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Botanica//EvaluacionDocente//ES', 'CALSCALE:GREGORIAN'];
+  evs.forEach(function(x, i){
+    var f = new Date(ED.cierre); f.setDate(f.getDate() - x[0]); var f2 = new Date(f); f2.setDate(f.getDate() + 1);
+    lines.push('BEGIN:VEVENT', 'UID:botanica-ed-' + ED.anio + '-' + i + '@evaluacion', 'DTSTAMP:' + ymd(new Date()) + 'T000000Z', 'DTSTART;VALUE=DATE:' + ymd(f), 'DTEND;VALUE=DATE:' + ymd(f2),
+      fold('SUMMARY:' + icsEsc(x[1])), fold('DESCRIPTION:' + icsEsc('El portafolio ' + ED.anio + ' cierra el ' + ED.cierreTxt + '. docentemas.cl')), 'END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  var ics = lines.join('\r\n');
+  var c = card('Recordatorios del cierre', '<p>' + evs.length + (evs.length === 1 ? ' recordatorio' : ' recordatorios') + ' antes del ' + ED.cierreTxt + ', para tu calendario.</p>', '');
+  var b = document.createElement('button'); b.type = 'button'; b.className = 'btn-small'; b.textContent = 'Descargar archivo de calendario';
+  b.addEventListener('click', function(){
+    try { var url = URL.createObjectURL(new Blob([ics], { type:'text/calendar;charset=utf-8' })); var a = document.createElement('a'); a.href = url; a.download = 'portafolio-botanica.ics'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); }, 2000); b.textContent = 'Archivo descargado'; }
+    catch(e){ b.textContent = 'No se pudo descargar'; }
+  });
+  c.insertBefore(b, c.querySelector('.src'));
+}
+
+// 2. Avance
+function edAvanceVer(){
+  var e = edEstado();
+  var c = card('Mi avance en el portafolio', '', ED_SRC);
+  var wrap = document.createElement('div');
+  var resumen = document.createElement('p'); resumen.className = 'cs';
+  function pintarResumen(){ var tot = 0, ok = 0; ED_TAREAS.forEach(function(t){ e[t.id].forEach(function(x){ tot++; if (x) ok++; }); }); resumen.textContent = 'Llevas ' + ok + ' de ' + tot + ' pasos (' + Math.round(ok / tot * 100) + '%). Se guarda solo en este dispositivo.'; }
+  var mod = '';
+  ED_TAREAS.forEach(function(t){
+    if (t.mod !== mod) { mod = t.mod; var hm = document.createElement('p'); hm.style.cssText = 'margin:0.7rem 0 0.1rem;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--lavanda)'; hm.textContent = mod; wrap.appendChild(hm); }
+    var ht = document.createElement('p'); ht.style.cssText = 'margin:0.15rem 0 0.1rem;font-weight:600'; ht.textContent = t.nom; wrap.appendChild(ht);
+    var hq = document.createElement('p'); hq.style.cssText = 'margin:0 0 0.25rem;font-size:12.5px;color:var(--muted);line-height:1.45'; hq.textContent = t.que; wrap.appendChild(hq);
+    var box = document.createElement('div'); box.className = 'checks';
+    edPasos(t).forEach(function(p, i){
+      var lab = document.createElement('label'); var inp = document.createElement('input'); inp.type = 'checkbox'; inp.checked = !!e[t.id][i];
+      inp.addEventListener('change', function(){ e[t.id][i] = inp.checked; save(); pintarResumen(); });
+      lab.appendChild(inp); lab.appendChild(document.createTextNode(' ' + p)); box.appendChild(lab);
+    });
+    wrap.appendChild(box);
+  });
+  c.insertBefore(resumen, c.querySelector('.src')); c.insertBefore(wrap, c.querySelector('.src'));
+  pintarResumen(); scrollDown();
+  bot('La rúbrica oficial y el manual de tu agrupación están en la sección de descargas de docentemas.cl. Léelos antes de cada tarea, porque cambian según nivel y asignatura.', 'b-note');
+  edVolver(['Revisar un borrador']);
+}
+
+// 3. Revisar un borrador
+var ED_RESP = { 'Sí':2, 'En parte':1, 'Todavía no':0 };
+function edRevisar(){
+  bot('¿Qué tarea quieres revisar? Te hago preguntas guía y tú respondes mirando tu propio borrador. No escribas aquí el texto del portafolio.');
+  options(ED_TAREAS.map(function(t){ return t.nom; }), function(nom){
+    var t = ED_TAREAS.filter(function(x){ return x.nom === nom; })[0];
+    card(t.nom, '<p><b>Qué se evalúa.</b> ' + esc(t.evalua) + '</p>', ED_SRC);
+    var res = [];
+    (function preguntar(i){
+      if (i >= t.preguntas.length) return edRevisarFin(t, res);
+      bot((i + 1) + ' de ' + t.preguntas.length + '. ' + t.preguntas[i]);
+      options(Object.keys(ED_RESP), function(v){ res.push(ED_RESP[v]); preguntar(i + 1); }, false);
+    })(0);
+  });
+}
+function edRevisarFin(t, res){
+  var fuertes = [], reforzar = [];
+  res.forEach(function(r, i){ (r === 2 ? fuertes : reforzar).push(t.preguntas[i].replace(/^¿|\?$/g, '')); });
+  var h = '';
+  if (fuertes.length) h += '<p><b>Lo que ya está presente.</b></p>' + list(fuertes.map(function(x){ return x.charAt(0).toUpperCase() + x.slice(1) + '.'; }));
+  if (reforzar.length) h += '<p><b>Lo que conviene reforzar antes de cargar.</b></p>' + list(reforzar.map(function(x){ return x.charAt(0).toUpperCase() + x.slice(1) + '.'; }));
+  card('Tu revisión de la ' + t.nom.toLowerCase().replace(/\..*$/, ''), h, 'Preguntas guía elaboradas para Botánica a partir de lo que evalúa cada tarea según Mineduc. Contrástalas con la rúbrica oficial de tu agrupación.');
+  var i = ED_TAREAS.indexOf(t), e = edEstado()[t.id], k = edPasos(t).indexOf('Revisé el borrador con las preguntas guía');
+  if (!reforzar.length && k >= 0) { e[k] = true; save(); bot('Marqué este paso como hecho en tu avance.', 'b-note'); }
+  if (t.id === 't5') bot('Recuerda que las secciones B y C de esta tarea son individuales, aunque la sección A la hayan escrito en equipo.', 'b-note');
+  askAhorro('Evaluación docente', function(){ edVolver(['Revisar un borrador', 'Mi avance en el portafolio']); });
+}
+
+// 4. Prueba de conocimientos (ECEP)
+function edEcep(){
+  card('Prueba de conocimientos específicos y pedagógicos', list([
+    'Tiene 60 preguntas de selección múltiple. La diseña el CPEIP y la aplica la Agencia de Calidad de la Educación.',
+    'Mide conocimientos de tu disciplina, según las Bases Curriculares, y conocimientos pedagógicos, según los Estándares de Desarrollo Profesional alineados con el Marco para la Buena Enseñanza.',
+    'Es obligatoria para quienes están en un tramo que la exige y voluntaria para el resto.',
+    'Los resultados se expresan en niveles A, B, C y D, y junto al portafolio y los años de experiencia definen tu tramo.',
+    'Para cada prueba se publican temarios. Son la guía principal del repaso.'
+  ]), ED_ECEP_SRC);
+  if (!st.asig) {
+    bot('Si eliges tu asignatura, armo un plan de repaso con los objetivos de aprendizaje oficiales que ya tengo cargados.');
+    return options(['Elegir mi asignatura', 'Otra opción de evaluación docente'], function(v){ if (v === 'Otra opción de evaluación docente') edMenu(); else elegirAsig(); });
+  }
+  var cursos = cursosAsig(), oas = [];
+  cursos.forEach(function(cu){ oaDelNivel(cu).forEach(function(o){ oas.push([cu, o[0], o[2]]); }); });
+  if (!oas.length) { bot('No tengo cargados objetivos para ' + st.asig + '. Usa el temario oficial de tu prueba como guía.', 'b-note'); return edVolver(); }
+  bot('¿Cuántas semanas tienes para repasar?');
+  options(['2 semanas', '4 semanas', '8 semanas'], function(v){
+    var n = parseInt(v, 10), disc = Math.max(1, n - 1), por = Math.ceil(oas.length / disc), txt = 'Plan de repaso, ' + st.asig + ' (' + cursos.join(' y ') + ')\n';
+    for (var s = 0; s < disc; s++) {
+      var grupo = oas.slice(s * por, (s + 1) * por); if (!grupo.length) break;
+      txt += '\nSemana ' + (s + 1) + '\n' + grupo.map(function(o){ var t = o[2].split('•')[0].trim().replace(/[:,;]$/, ''); if (t.length > 150) t = t.slice(0, 147).replace(/\s\S*$/, '') + '…'; return '[ ] ' + o[0] + ', OA ' + o[1] + '. ' + t; }).join('\n') + '\n';
+    }
+    txt += '\nSemana ' + n + '\n[ ] Conocimientos pedagógicos. Estándares de Desarrollo Profesional y Marco para la Buena Enseñanza 2021.\n[ ] Revisión del temario oficial para marcar lo que falta.\n[ ] Repaso de los objetivos que marcaste como más débiles.';
+    copyCard('Plan de repaso en ' + n + ' semanas', txt, asigSrc() + ' Contrasta este plan con el temario oficial de tu prueba, que puede incluir otros niveles.');
+    bot('Una forma de repasar con menos carga es dividir los objetivos con colegas del departamento que también rinden y explicárselos entre ustedes.', 'b-note');
+    askAhorro('Evaluación docente', function(){ edVolver(); });
+  });
+}
+
+// 5. Cuidar el tiempo
+function edCuidar(){
+  card('Cuidar tu tiempo durante la evaluación', list([
+    'Reserva un bloque fijo a la semana para el portafolio, dentro de tu jornada si el liceo lo permite, en lugar de trabajar todas las noches.',
+    'Elige para la Tarea 1 y la Tarea 2 una unidad que ya estés haciendo. Así las evidencias salen de tu trabajo habitual.',
+    'Junta las evidencias mientras haces clases, como fotos de pizarras sin rostros, pautas y resultados del curso sin nombres.',
+    'Conversa con colegas que también se evalúan. La sección A de la Tarea 5 pueden elaborarla en conjunto.',
+    'Si atraviesas una situación que te impide hacer el proceso, existe la posibilidad de pedir suspensión o eximición durante todo el período. La resuelve el sostenedor.',
+    'Pregunta en el liceo qué acompañamiento ofrecerá a quienes se evalúan este año.'
+  ]), ED_SRC + ' Decreto 339, arts. 34 y 35.');
+  bot('La evaluación docente es una exigencia individual, pero su carga se aliviana cuando el equipo la organiza en conjunto. Puedes llevar este tema a tu jefatura o a Coordinación Pedagógica.', 'b-note');
+  edVolver(['Mi avance en el portafolio']);
+}
+
 // ---------- Flora generativa (dibujo por reglas, sin IA) ----------
-var FLORA = { copihue:'#B5473A', lavanda:'#7B6AA8', ocre:'#C8902E', tallo:'#7A8668' };
+var FLORA = { copihue:'#B5473A', lavanda:'#7B6AA8', ocre:'#C8902E', azul:'#4F72A8', tallo:'#7A8668' };
 function floraRng(seed){ var a = seed >>> 0; return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 function fx(n){ return n.toFixed(1); }
 function fPath(d, stroke, w, fill){ return '<path d="' + d + '" stroke="' + stroke + '" stroke-width="' + w + '" fill="' + (fill || 'none') + '" stroke-linecap="round"/>'; }
@@ -1309,6 +1496,12 @@ function floraSVG(kind, seed){
       for (var i = 0; i < 9; i++) { var y = top + i * 7, side = i % 2 ? 1 : -1; body += '<ellipse cx="' + fx(x + side * 3.4) + '" cy="' + fx(y) + '" rx="3.4" ry="4.6" fill="' + FLORA.lavanda + '"/>'; }
       body += fLeaf(x, base - 30, -Math.PI / 2 - 0.5, 22);
     });
+  } else if (kind === 'azulillo') {
+    [[70, 60], [110, 34], [150, 52]].forEach(function(f, k){
+      body += fStem(f[0], 146, f[1], r) + fLeaf(f[0], 132, -Math.PI / 2 + (k % 2 ? 0.7 : -0.7), 28);
+      for (var i = 0; i < 6; i++) body += fLeaf(f[0], f[1], (i / 6) * Math.PI * 2 + r() * 0.1, 15, FLORA.azul, FLORA.azul);
+      body += '<circle cx="' + f[0] + '" cy="' + f[1] + '" r="3" fill="' + FLORA.ocre + '"/>';
+    });
   } else {
     body = fStem(110, 148, 56, r) + fLeaf(110, 118, -Math.PI / 2 - 0.9, 26) + fLeaf(110, 100, -Math.PI / 2 + 0.9, 22) + fDaisy(110, 52, 40, 1, FLORA.ocre, r);
   }
@@ -1330,7 +1523,8 @@ function inicio(){
   var c = document.createElement('div'); c.className = 'home';
   [['copihue', 'Copihue', 'Jefatura de curso', 'Lo que toca este mes, textos listos, reuniones, consejo de curso y seguimiento.', FLORA.copihue, function(){ menuJefatura(); }],
    ['lavanda', 'Lavanda', 'Consultar el reglamento', 'Pregunta con tus palabras. Responde con el texto del reglamento y su página.', FLORA.lavanda, function(){ consultar(); }],
-   ['margarita', 'Margarita', 'Mi asignatura', 'Notas, evaluaciones, pautas y planificación con los objetivos oficiales.', FLORA.ocre, function(){ miAsignatura(); }]].forEach(function(t){
+   ['margarita', 'Margarita', 'Mi asignatura', 'Notas, evaluaciones, pautas y planificación con los objetivos oficiales.', FLORA.ocre, function(){ miAsignatura(); }],
+   ['azulillo', 'Azulillo', 'Evaluación docente', 'Plazos del portafolio, tu avance, revisión con preguntas guía y repaso para la prueba.', FLORA.azul, function(){ evalDocente(); }]].forEach(function(t){
     var b = document.createElement('button'); b.type = 'button'; b.className = 'tile';
     b.innerHTML = floraSVG(t[0], 7) + '<span class="kind" style="color:' + t[4] + '">' + t[1] + '</span><span class="tt">' + t[2] + '</span><span class="td">' + t[3] + '</span>';
     b.addEventListener('click', function(){ optionsEl.innerHTML = ''; user(t[2]); t[5](); });
@@ -1341,7 +1535,7 @@ function inicio(){
 
 // ---------- Qué es Botánica ----------
 function acerca(){
-  card('Qué es Botánica', '<p>Botánica es un prototipo gratuito que busca aportar al bienestar docente disminuyendo la carga administrativa de la jefatura de curso. Lo hace ordenando tareas, calendarizando hitos, ayudando a redactar textos y orientando la aplicación de los reglamentos.</p>' +
+  card('Qué es Botánica', '<p>Botánica es un prototipo gratuito que busca aportar al bienestar docente disminuyendo la carga administrativa de la jefatura de curso. Lo hace ordenando tareas, calendarizando hitos, ayudando a redactar textos y orientando la aplicación de los reglamentos. También acompaña la asignatura y el proceso de evaluación docente.</p>' +
     '<p>Sus contenidos se basan en orientaciones del Ministerio de Educación, de Educarchile y en el Decreto 67 de 2018. Las actividades y textos son sugerencias para adaptar. Ante cualquier duda, priman el reglamento interno y los protocolos de tu establecimiento.</p>' +
     '<p>Botánica no usa inteligencia artificial para responder, no pide datos de estudiantes y no envía información a ningún servidor. Tus preferencias quedan solo en este dispositivo.</p>' +
     '<p>Es parte de una investigación del Doctorado en Educación en Consorcio (UBB, UCSC, UCT y UCM).</p>', '');
