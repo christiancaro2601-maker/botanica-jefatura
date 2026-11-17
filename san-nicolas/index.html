@@ -134,7 +134,7 @@
       <span class="brand-mark" id="brand-mark"></span>
       <span class="brand-word"><b>bot</b>ánica</span><span class="brand-tag">Jefatura de curso, San Nicolás</span>
     </div>
-    <p class="sub">Menos trámite, más tiempo para florecer. Ordena tu jefatura con las reglas de tu liceo.</p>
+    <p class="sub">Menos trámite, más tiempo para florecer. Ordena tu jefatura y tu asignatura con las reglas de tu liceo.</p>
   </header>
 
   <div class="layout">
@@ -1050,40 +1050,38 @@ function oaLoad(){ if (!OA) { try { OA = JSON.parse(document.getElementById('oa-
 // asignatura del liceo -> fuente de OA en las Bases (y eje, si corresponde)
 var ASIG = {
   '1° y 2° medio': {
-    'Lengua y Literatura': { src:'Lengua y Literatura', notas:['5 (1er sem) / 4 (2do sem)', 0] },
-    'Matemática': { src:'Matemática', notas:[4, 5] },
-    'Inglés': { src:'Inglés', notas:[4, 0] },
-    'Historia, Geografía y Ciencias Sociales': { src:'Historia, Geografía y Ciencias Sociales', notas:[3, 0] },
-    'Biología': { src:'Ciencias Naturales', eje:'Biología', notas:[3, 0] },
-    'Física': { src:'Ciencias Naturales', eje:'Física', notas:[3, 0] },
-    'Química': { src:'Ciencias Naturales', eje:'Química', notas:[3, 3] },
-    'Tecnología': { src:'Tecnología', notas:[3, 0] },
-    'Música': { src:'Música', notas:[2, 0] },
-    'Educación Física y Salud': { src:'Educación Física y Salud', notas:[2, 0] },
-    'Orientación': { src:'Orientación', notas:[1, 0] },
-    'Religión': { src:null, notas:[2, 0] }
+    'Lengua y Literatura': { src:'Lengua y Literatura' },
+    'Matemática': { src:'Matemática' },
+    'Inglés': { src:'Inglés' },
+    'Historia, Geografía y Ciencias Sociales': { src:'Historia, Geografía y Ciencias Sociales' },
+    'Biología': { src:'Ciencias Naturales', eje:'Biología' },
+    'Física': { src:'Ciencias Naturales', eje:'Física' },
+    'Química': { src:'Ciencias Naturales', eje:'Química' },
+    'Tecnología': { src:'Tecnología' },
+    'Música': { src:'Música' },
+    'Educación Física y Salud': { src:'Educación Física y Salud' },
+    'Orientación': { src:'Orientación', sinNota:true }
   },
   '3° y 4° medio': {
-    'Lengua y Literatura': { src:'Lengua y Literatura', notas:['5 (1er sem) / 4 (2do sem)', 0] },
-    'Matemática': { src:'Matemática', notas:[4, 3] },
-    'Inglés': { src:'Inglés', notas:[3, 0] },
-    'Educación Ciudadana': { src:'Educación Ciudadana', notas:[3, 0] },
-    'Filosofía': { src:'Filosofía', notas:[3, 5] },
-    'Ciencias para la Ciudadanía': { src:'Ciencias para la Ciudadanía', notas:[3, 0] },
-    'Educación Física y Salud': { src:'Educación Física y Salud', notas:[2, 0] },
-    'Electivo del plan diferenciado': { src:'*electivo', notas:[4, 'máximo 5'] },
-    'Religión': { src:null, notas:[2, 0] },
-    'Orientación': { src:null, notas:[1, 0] }
+    'Lengua y Literatura': { src:'Lengua y Literatura' },
+    'Matemática': { src:'Matemática' },
+    'Inglés': { src:'Inglés' },
+    'Educación Ciudadana': { src:'Educación Ciudadana' },
+    'Filosofía': { src:'Filosofía' },
+    'Ciencias para la Ciudadanía': { src:'Ciencias para la Ciudadanía' },
+    'Educación Física y Salud': { src:'Educación Física y Salud' },
+    'Electivo del plan diferenciado': { src:'*electivo' },
   }
 };
 var ASIG_SRC_12 = 'Mineduc (2015). Bases Curriculares 7° básico a 2° medio. Decretos 614/2013 y 369/2015.';
 var ASIG_SRC_34 = 'Mineduc (2019). Bases Curriculares 3° y 4° medio. Decreto 193/2019.';
 var ASIG_SRC = ASIG_SRC_12;
 function asigSrc(){ return st.asigNivel === '3° y 4° medio' ? ASIG_SRC_34 : ASIG_SRC_12; }
-var NOTAS_SRC = 'Reglamento Interno de Evaluación y Promoción Escolar 2026, Liceo Bicentenario de Excelencia Polivalente San Nicolás.';
+var NOTAS_SRC = 'Reglamento Interno de Evaluación y Promoción Escolar 2026, arts. 8, 9, 12 y 25.';
+var SIN_NOTA = 'En este liceo Orientación no se evalúa, según el artículo 10 del Reglamento de Evaluación. Puedes usar la planificación de unidad y los objetivos del nivel.';
 
 function asigInfo(){
-  if (st.asigNivel === '3° y 4° medio' && /^Electivo: /.test(st.asig || '')) return { src:st.asig, notas:[4, 'máximo 5'] };
+  if (st.asigNivel === '3° y 4° medio' && /^Electivo: /.test(st.asig || '')) return { src:st.asig };
   var g = ASIG[st.asigNivel]; return g ? g[st.asig] : null;
 }
 function oaDelNivel(curso){
@@ -1123,7 +1121,7 @@ function elegirAsig(){
       }
       st.asigNivel = nv; st.asig = a; save(); renderSide();
       var inf = ASIG[nv][a];
-      if (!inf.src) bot(a === 'Religión' ? 'Religión sigue el programa propio del liceo, que aún no está cargado. Ya puedes usar la calculadora, el plan de evaluaciones y las pautas.' : 'Esta asignatura no tiene Bases Curriculares nacionales para el nivel. Ya puedes usar la calculadora, el plan de evaluaciones y las pautas.', 'b-note');
+      if (!inf.src) bot('Esta asignatura no tiene Bases Curriculares nacionales para el nivel. Ya puedes usar la calculadora, el plan de evaluaciones y las pautas.', 'b-note');
       miAsignatura();
     });
   });
@@ -1134,20 +1132,20 @@ function asigVolver(){ options(['Otra herramienta de mi asignatura'], function()
 function notaLiceo(p, ideal, modo){
   if (!(ideal > 0) || isNaN(p)) return null;
   var n;
-  if (modo === 'e60') { var c = 0.6 * ideal; n = p < c ? 1.5 + (4 - 1.5) * p / c : 4 + 3 * (p - c) / (ideal - c); }
-  else n = p * 7 / ideal;
-  n = Math.max(1.5, Math.min(7, n));
+  var c = 0.6 * ideal; n = p < c ? 1 + 3 * p / c : 4 + 3 * (p - c) / (ideal - c);
+  n = Math.max(1, Math.min(7, n));
   return Math.round(n * 10 + 1e-9) / 10;
 }
 function calcNotas(){
+  var a0 = asigInfo(); if (a0 && a0.sinNota) { bot(SIN_NOTA, 'b-note'); asigVolver(); return addHome(); }
   var c = card('Calculadora de notas', '', NOTAS_SRC);
   var f = document.createElement('form'); f.className = 'frm';
   f.innerHTML = '<label>Puntaje ideal<input name="ideal" type="number" min="1" step="0.5" placeholder="Ej. 37" required></label>' +
-    '<label>Fórmula<select name="modo"><option value="lic">Puntaje × 7 ÷ puntaje ideal (ejemplo del reglamento)</option><option value="e60">Escala 1.5 a 7.0 con 60% de exigencia</option></select></label>' +
+    '<label>Escala<select name="modo"><option value="e60">1.0 a 7.0 con 60% de exigencia</option></select></label>' +
     '<label>Puntajes obtenidos (opcional, uno por línea o separados por coma)<textarea name="ptos" placeholder="30, 25, 18"></textarea></label>';
   var go = document.createElement('button'); go.type = 'submit'; go.className = 'btn-small'; go.textContent = 'Calcular';
   f.appendChild(go); c.appendChild(f);
-  bot('El reglamento pide 60% de exigencia para el 4.0, pero su ejemplo usa puntaje × 7 ÷ puntaje ideal, con la que el 4.0 se logra con 57%. Elige la que use tu departamento y confírmalo con Coordinación Pedagógica.', 'b-note');
+  bot('El reglamento fija una escala de 1.0 a 7.0 con un decimal y nota 4.0 al 60% de exigencia. No detalla la fórmula bajo el 4.0, así que la tabla usa la proporción lineal habitual. Confírmala con tu Mentor.', 'b-note');
   f.addEventListener('submit', function(e){
     e.preventDefault();
     var ideal = parseFloat(f.ideal.value), modo = f.modo.value;
@@ -1165,27 +1163,28 @@ function calcNotas(){
 // 2. Plan de evaluaciones
 function planEval(){
   var a = asigInfo(); if (!a) return elegirAsig();
+  if (a.sinNota) { bot(SIN_NOTA, 'b-note'); asigVolver(); return addHome(); }
   bot('¿Para qué curso y semestre?');
   var opts = []; cursosAsig().forEach(function(cu){ opts.push(cu + ', 1er semestre'); opts.push(cu + ', 2do semestre'); });
-  options(opts, function(v){
+  options(opts, function(v){ bot('¿Cuántas horas semanales tiene la asignatura en ese curso?'); options(['1 hora', '2 a 4 horas', '5 o más horas'], function(h){
     var cu = v.split(',')[0], sem = v.indexOf('1er') >= 0 ? 1 : 2;
-    var ns = a.notas[0]; if (typeof ns === 'string') ns = sem === 1 ? parseInt(ns, 10) : parseInt(ns.split('/')[1], 10);
-    var acum = a.notas[1];
-    var inicio = sem === 1 ? [2, 16] : [7, 4], fin = sem === 1 ? [5, 30] : [10, 27]; // marzo-junio / agosto-noviembre
+    var ns = h === '1 hora' ? 2 : h === '2 a 4 horas' ? 3 : 5;
+    var acum = 3;
+    var inicio = sem === 1 ? [2, 4] : [6, 6], fin = sem === 1 ? [5, 18] : [11, 4]; // 4 de marzo a 18 de junio / 6 de julio a 4 de diciembre
     var y = new Date().getFullYear(), d0 = new Date(y, inicio[0], inicio[1]), d1 = new Date(y, fin[0], fin[1]);
     var oas = oaDelNivel(cu), filas = [];
     for (var i = 0; i < ns; i++){
       var d = new Date(d0.getTime() + (d1 - d0) * (i + 1) / (ns + 0.4));
-      var tipo = i % 2 === 0 ? 'Prueba (21 a 35 puntos)' : 'Trabajo de desempeño (21 a 45 puntos)';
+      var tipo = 'Evaluación conceptual o procedimental';
       var grupo = oas.length ? oas.slice(Math.floor(i * oas.length / ns), Math.floor((i + 1) * oas.length / ns)) : [];
       filas.push([ 'Evaluación ' + (i + 1), 'Semana del ' + d.getDate() + ' de ' + MESES[d.getMonth()], tipo, grupo.map(function(o){ return 'OA ' + o[0]; }).join(', ') || 'A definir' ]);
     }
     card('Plan de evaluaciones, ' + st.asig + ', ' + cu, '<table class="tbl">' + filas.map(function(f){ return '<tr><td><b>' + esc(f[0]) + '</b><br>' + esc(f[1]) + '</td><td>' + esc(f[2]) + '<br><span style="color:var(--muted)">' + esc(f[3]) + '</span></td></tr>'; }).join('') + '</table>' +
-      (acum && acum !== 0 ? '<p>Además, el reglamento indica <b>' + esc(String(acum)) + ' calificaciones acumulativas</b> en el semestre. Puedes formarlas con controles breves o tareas.</p>' : ''), NOTAS_SRC);
-    copyCard('Para copiar', 'Plan de evaluaciones ' + st.asig + ' ' + cu + ', semestre ' + sem + '\n' + filas.map(function(f){ return f.join(' | '); }).join('\n') + (acum && acum !== 0 ? '\nCalificaciones acumulativas: ' + acum : ''), '');
-    bot('Las fechas son sugeridas y reparten las evaluaciones a lo largo del semestre. Ajústalas al calendario del liceo y recuerda entregar los resultados en un máximo de 15 días hábiles.', 'b-note');
+      '<p>Son las ' + ns + ' notas mínimas sugeridas para una asignatura de ' + esc(h) + ' semanales. Además, el reglamento indica <b>3 notas de habilidades blandas</b> en el semestre. Su promedio pondera 20% de la nota final en la modalidad científico humanista y 30% en las asignaturas de especialidad técnico profesional.</p>', NOTAS_SRC);
+    copyCard('Para copiar', 'Plan de evaluaciones ' + st.asig + ' ' + cu + ', semestre ' + sem + '\n' + filas.map(function(f){ return f.join(' | '); }).join('\n') + '\nNotas de habilidades blandas: ' + acum, '');
+    bot('Las fechas son sugeridas y reparten las evaluaciones entre el inicio y el término de cada semestre del calendario regional 2026. Ajústalas al calendario del liceo y recuerda registrar las calificaciones en un máximo de 10 días hábiles desde su aplicación.', 'b-note');
     asigVolver(); addHome();
-  });
+  }); });
 }
 
 // 3. Pauta o rúbrica
@@ -1205,7 +1204,7 @@ function pautaRubrica(){
     var f = document.createElement('form'); f.className = 'frm';
     var sel = '<label>Objetivo de aprendizaje que evalúa<select name="oa"><option value="">Sin OA específico</option>' + oas.map(function(x, i){ return '<option value="' + i + '">' + esc(x[0] + ', OA ' + x[1][0] + '. ' + x[1][2].slice(0, 90)) + '…</option>'; }).join('') + '</select></label>';
     f.innerHTML = sel + '<label>Título de la actividad<input name="tit" type="text" placeholder="Ej. Informe de laboratorio de ondas"></label>' +
-      '<label><input type="checkbox" name="fmt" checked> Incluir aspectos formales (20% del puntaje, según el reglamento)</label>';
+      '<label><input type="checkbox" name="fmt" checked> Incluir aspectos formales</label>';
     var go = document.createElement('button'); go.type = 'submit'; go.className = 'btn-small'; go.textContent = 'Armar pauta';
     f.appendChild(go); c.appendChild(f); scrollDown();
     f.addEventListener('submit', function(e){
@@ -1220,9 +1219,8 @@ function pautaRubrica(){
       var txt = (f.tit.value || tipo) + '\n' + st.asig + (o ? '\nObjetivo, ' + o[0] + ' OA ' + o[1][0] + '. ' + o[1][2] : '') + '\n\nNiveles: Logrado (3), Medianamente logrado (2), Por lograr (1), No observado (0).\n\n';
       txt += 'Criterios de aprendizaje (puntaje × ' + pesoC + ')\n' + crit.map(function(k, i){ return (i + 1) + '. ' + k + '  ____ / ' + (3 * pesoC); }).join('\n');
       if (fmt) txt += '\n\nAspectos formales\n' + fmtCrit.map(function(k, i){ return (crit.length + i + 1) + '. ' + k + '  ____ / ' + (3 * pesoF); }).join('\n');
-      txt += '\n\nPuntaje total: ____ / ' + total + (fmt ? '  (aprendizaje ' + Math.round(totC / total * 100) + '%, formal ' + Math.round(totF / total * 100) + '%)' : '') + '\nDescuento por atraso en la entrega: 1 punto por clase de atraso, sin optar a nota máxima.';
-      copyCard('Pauta lista para copiar', txt, 'Formato según el Reglamento de Evaluación del liceo, numeral 3.2 y numeral 8, pp. 119-143.');
-      if (total < 21 || total > 45) bot('El reglamento pide entre 21 y 45 puntos para trabajos de desempeño. Agrega o quita un criterio para ajustar.', 'b-note');
+      txt += '\n\nPuntaje total: ____ / ' + total + (fmt ? '  (aprendizaje ' + Math.round(totC / total * 100) + '%, formal ' + Math.round(totF / total * 100) + '%)' : '');
+      copyCard('Pauta lista para copiar', txt, 'El Reglamento de Evaluación 2026 pide que cada instrumento vaya acompañado de su pauta de corrección o rúbrica, art. 8.');
       asigVolver(); addHome();
     });
   });
@@ -1479,7 +1477,7 @@ function edCuidar(){
     'Si atraviesas una situación que te impide hacer el proceso, existe la posibilidad de pedir suspensión o eximición durante todo el período. La resuelve el sostenedor.',
     'Pregunta en el liceo qué acompañamiento ofrecerá a quienes se evalúan este año.'
   ]), ED_SRC + ' Decreto 339, arts. 34 y 35.');
-  bot('La evaluación docente es una exigencia individual, pero su carga se aliviana cuando el equipo la organiza en conjunto. Puedes llevar este tema a tu jefatura o a Coordinación Pedagógica.', 'b-note');
+  bot('La evaluación docente es una exigencia individual, pero su carga se aliviana cuando el equipo la organiza en conjunto. Puedes llevar este tema a tu jefatura o a la Unidad Técnico Pedagógica.', 'b-note');
   edVolver(['Mi avance en el portafolio']);
 }
 
@@ -1540,6 +1538,7 @@ function inicio(){
   var c = document.createElement('div'); c.className = 'home';
   [['copihue', 'Copihue', 'Jefatura de curso', 'Lo que toca este mes, textos listos, reuniones, consejo de curso y seguimiento.', FLORA.copihue, function(){ menuJefatura(); }],
    ['lavanda', 'Lavanda', 'Consultar el reglamento', 'Pregunta con tus palabras. Responde con el texto del reglamento y su página.', FLORA.lavanda, function(){ consultar(); }],
+   ['margarita', 'Margarita', 'Mi asignatura', 'Notas, evaluaciones, pautas y planificación con los objetivos oficiales.', FLORA.ocre, function(){ miAsignatura(); }],
    ['azulillo', 'Azulillo', 'Evaluación docente', 'Plazos del portafolio, tu avance, revisión con preguntas guía y repaso para la prueba.', FLORA.azul, function(){ evalDocente(); }]].forEach(function(t){
     var b = document.createElement('button'); b.type = 'button'; b.className = 'tile';
     b.innerHTML = floraSVG(t[0], 7) + '<span class="kind" style="color:' + t[4] + '">' + t[1] + '</span><span class="tt">' + t[2] + '</span><span class="td">' + t[3] + '</span>';
@@ -1551,7 +1550,7 @@ function inicio(){
 
 // ---------- Qué es Botánica ----------
 function acerca(){
-  card('Qué es Botánica', '<p>Botánica es un prototipo gratuito que busca aportar al bienestar docente disminuyendo la carga administrativa de la jefatura de curso. Lo hace ordenando tareas, calendarizando hitos, ayudando a redactar textos y orientando la aplicación de los reglamentos. También acompaña el proceso de evaluación docente.</p>' +
+  card('Qué es Botánica', '<p>Botánica es un prototipo gratuito que busca aportar al bienestar docente disminuyendo la carga administrativa de la jefatura de curso. Lo hace ordenando tareas, calendarizando hitos, ayudando a redactar textos y orientando la aplicación de los reglamentos. También acompaña la asignatura y el proceso de evaluación docente.</p>' +
     '<p>Sus contenidos se basan en orientaciones del Ministerio de Educación, de Educarchile y en el Decreto 67 de 2018. Las actividades y textos son sugerencias para adaptar. Ante cualquier duda, priman el reglamento interno y los protocolos de tu establecimiento.</p>' +
     '<p>Botánica no usa inteligencia artificial para responder, no pide datos de estudiantes y no envía información a ningún servidor. Tus preferencias quedan solo en este dispositivo.</p>' +
     '<p>Es parte de una investigación del Doctorado en Educación en Consorcio (UBB, UCSC, UCT y UCM).</p>', '');
